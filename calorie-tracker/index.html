@@ -183,10 +183,17 @@ body{
 .entry-del svg{width:16px;height:16px}
 @media (max-width:520px){.entry-macros{display:none}}
 
-.add-food{width:100%;padding:13px 16px;display:flex;align-items:center;gap:8px;font-weight:700;font-size:13.5px;
-  color:var(--accent-deep);border-top:1px solid var(--line);transition:background .12s}
+.meal-foot{display:flex;align-items:stretch;border-top:1px solid var(--line)}
+.add-food{flex:1;padding:13px 16px;display:flex;align-items:center;gap:8px;font-weight:700;font-size:13.5px;
+  color:var(--accent-deep);transition:background .12s}
 .add-food:hover{background:var(--accent-soft)}
 .add-food svg{width:17px;height:17px}
+.save-meal{display:flex;align-items:center;gap:7px;padding:13px 16px;font-weight:700;font-size:13.5px;
+  color:var(--ink-2);border-left:1px solid var(--line);transition:background .12s,color .12s;flex:none}
+.save-meal:hover{background:var(--accent-soft);color:var(--accent-deep)}
+.save-meal svg{width:16px;height:16px}
+.list-label{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);
+  margin:2px 2px 8px}
 .meal-empty{padding:14px 16px;font-size:13px;color:var(--ink-3);font-weight:500}
 
 /* ---------- Modal ---------- */
@@ -419,6 +426,17 @@ body{
   </div>
 </div>
 
+<!-- ============ Save meal modal ============ -->
+<div class="scrim" id="saveScrim" role="dialog" aria-modal="true" aria-labelledby="saveTitle">
+  <div class="modal">
+    <div class="modal-head">
+      <h2 id="saveTitle">Save meal</h2>
+      <button class="modal-close" data-close="saveScrim" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+    </div>
+    <div class="modal-body" id="saveBody"></div>
+  </div>
+</div>
+
 <!-- ============ Database modal ============ -->
 <div class="scrim" id="dbScrim" role="dialog" aria-modal="true" aria-labelledby="dbTitle">
   <div class="modal">
@@ -482,8 +500,9 @@ function seedState(){
   return {
     goals:{kcal:2200, p:150, c:220, f:70},
     foods: SEED_FOODS.map((f,i)=>({id:"seed"+i, photo:"", ...f})),
-    log:{},        // { 'YYYY-MM-DD': [ {id, foodId, meal, servings} ] }
+    log:{},        // { 'YYYY-MM-DD': [ {id, foodId, meal, servings, grams?} ] }
     mealPhotos:{}, // { 'YYYY-MM-DD': { breakfast:dataURL, ... } }
+    savedMeals:[], // [ {id, name, items:[{foodId, servings, grams?}]} ]
     theme:null
   };
 }
@@ -492,6 +511,7 @@ let state = store.read() || seedState();
 // migrate missing keys
 state.mealPhotos = state.mealPhotos || {};
 state.goals = state.goals || {kcal:2200,p:150,c:220,f:70};
+state.savedMeals = state.savedMeals || [];
 // backfill gram weights onto seed foods saved before grams mode existed
 SEED_FOODS.forEach((sf,i)=>{
   const f = state.foods.find(x=>x.id==="seed"+i);
@@ -632,9 +652,14 @@ function renderMeals(){
     } else {
       html += `<div class="meal-empty">Nothing logged yet.</div>`;
     }
-    html += `<button class="add-food" data-addfood="${meal.id}">
+    html += `<div class="meal-foot">
+      <button class="add-food" data-addfood="${meal.id}">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
-        Add food to ${meal.name.toLowerCase()}</button>`;
+        Add food to ${meal.name.toLowerCase()}</button>
+      ${entries.length? `<button class="save-meal" data-savemeal="${meal.id}" title="Save this meal so you can log it again in one tap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+        Save meal</button>`:""}
+    </div>`;
     card.innerHTML=html;
     wrap.appendChild(card);
   });
@@ -657,26 +682,114 @@ function openPicker(mealId){
 }
 function renderPickerList(q){
   const body=$("#pickerBody");
-  const list = filterFoods(q);
   body.innerHTML = `
     <div class="search">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>
-      <input id="pickerSearch" type="text" placeholder="Search foods…" autocomplete="off" value="${esc(q)}">
+      <input id="pickerSearch" type="text" placeholder="Search foods and saved meals…" autocomplete="off" value="${esc(q)}">
     </div>
-    <div class="food-list" id="pickerList">
-      ${list.length? list.map(foodRowHTML).join("") : emptyFoodsHTML(q)}
-    </div>
+    <div id="pickerLists">${pickerListsHTML(q)}</div>
     <button class="new-food-cta" id="newFoodBtn">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
       Create${q?` "${esc(q)}"`:" a new food"}
     </button>`;
   const s=$("#pickerSearch");
   s.addEventListener("input", ()=>{
-    const list=filterFoods(s.value);
-    $("#pickerList").innerHTML = list.length? list.map(foodRowHTML).join("") : emptyFoodsHTML(s.value);
+    $("#pickerLists").innerHTML = pickerListsHTML(s.value);
     $("#newFoodBtn").innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg> Create${s.value?` "${esc(s.value)}"`:" a new food"}`;
   });
   $("#newFoodBtn").addEventListener("click", ()=> openNewFoodForm($("#pickerSearch").value));
+}
+function pickerListsHTML(q){
+  const foods=filterFoods(q);
+  const tpls=filterTemplates(q);
+  let out="";
+  if(tpls.length){
+    out += `<div class="list-label">Saved meals</div>
+      <div class="food-list" style="margin-bottom:14px">${tpls.map(tplRowHTML).join("")}</div>
+      <div class="list-label">Foods</div>`;
+  }
+  out += `<div class="food-list">${foods.length? foods.map(foodRowHTML).join("") : emptyFoodsHTML(q)}</div>`;
+  return out;
+}
+function filterTemplates(q){
+  q=(q||"").trim().toLowerCase();
+  let list=state.savedMeals.slice();
+  if(q) list=list.filter(t=>t.name.toLowerCase().includes(q));
+  return list.sort((a,b)=>a.name.localeCompare(b.name));
+}
+function tplRowHTML(t){
+  const items=t.items.filter(it=>foodById(it.foodId));
+  const kcal=r0(items.reduce((s,it)=>s+foodById(it.foodId).kcal*it.servings,0));
+  return `<div style="display:flex;gap:8px;align-items:center">
+    <button class="food-row" data-mealtpl="${t.id}" style="flex:1">
+      <div class="fr-thumb" style="background:var(--accent-soft);color:var(--accent-deep)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+      </div>
+      <div class="fr-main">
+        <div class="fr-name">${esc(t.name)}</div>
+        <div class="fr-sub">${items.length} ${items.length===1?"item":"items"} · one tap logs all</div>
+      </div>
+      <div class="fr-kcal tnum">${kcal}<small>kcal</small></div>
+    </button>
+    <button class="entry-del" data-tpldel="${t.id}" aria-label="Delete saved meal ${esc(t.name)}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m2 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg></button>
+  </div>`;
+}
+function addSavedMeal(tplId){
+  const tpl=state.savedMeals.find(t=>t.id===tplId); if(!tpl) return;
+  const items=tpl.items.filter(it=>foodById(it.foodId));
+  if(!items.length){ toast("The foods in this saved meal are no longer in your database",true); return; }
+  if(!state.log[current]) state.log[current]=[];
+  let kcal=0;
+  items.forEach(it=>{
+    const entry={id:uid(), foodId:it.foodId, meal:editingFoodId, servings:it.servings};
+    if(it.grams) entry.grams=it.grams;
+    state.log[current].push(entry);
+    kcal+=foodById(it.foodId).kcal*it.servings;
+  });
+  save(); render(); closeModal("pickerScrim");
+  const missing=tpl.items.length-items.length;
+  toast(`"${tpl.name}" added — ${items.length} ${items.length===1?"item":"items"}, ${r0(kcal)} kcal`+(missing?` (${missing} no longer in database)`:""));
+}
+
+/* ---- save current meal as a template ---- */
+function openSaveMeal(mealId){
+  const meal=MEALS.find(m=>m.id===mealId);
+  const entries=dayEntries().filter(e=>e.meal===mealId && foodById(e.foodId));
+  if(!entries.length){ toast("Nothing to save yet",true); return; }
+  const total=r0(entries.reduce((s,e)=>s+entryTotals(e).kcal,0));
+  const body=$("#saveBody");
+  body.innerHTML=`
+    <div class="field"><label for="svName">Meal name</label>
+      <input id="svName" type="text" value="${esc("My "+meal.name.toLowerCase())}" autocomplete="off">
+      <div class="hint">Saving with an existing name updates that saved meal.</div></div>
+    <div class="list-label">What's inside</div>
+    <div class="food-list" style="margin-bottom:14px">
+      ${entries.map(e=>{
+        const f=foodById(e.foodId), t=entryTotals(e);
+        return `<div class="food-row" style="cursor:default">
+          <div class="fr-thumb">${f.photo?`<img src="${f.photo}" alt="">`:esc((f.name[0]||"·").toUpperCase())}</div>
+          <div class="fr-main"><div class="fr-name">${esc(f.name)}</div><div class="fr-sub">${servingLabel(f,e)}</div></div>
+          <div class="fr-kcal tnum">${r0(t.kcal)}<small>kcal</small></div>
+        </div>`;
+      }).join("")}
+    </div>
+    <div class="calc-preview"><span class="cp-l">Total</span><span class="cp-v tnum">${total} <small>kcal</small></span></div>
+    <button class="btn" id="svSave">Save meal</button>`;
+  openModal("saveScrim");
+  setTimeout(()=>{ const n=$("#svName"); if(n) n.select(); },260);
+  $("#svSave").onclick=()=>{
+    const name=$("#svName").value.trim();
+    if(!name){ toast("Give the meal a name",true); return; }
+    const items=entries.map(e=>{
+      const it={foodId:e.foodId, servings:e.servings};
+      if(e.grams) it.grams=e.grams;
+      return it;
+    });
+    const existing=state.savedMeals.find(t=>t.name.toLowerCase()===name.toLowerCase());
+    if(existing){ existing.items=items; toast(`Updated "${name}"`); }
+    else { state.savedMeals.push({id:uid(), name, items}); toast(`Saved "${name}" — find it under Add food`); }
+    save(); closeModal("saveScrim");
+  };
 }
 function filterFoods(q){
   q=(q||"").trim().toLowerCase();
@@ -1091,6 +1204,25 @@ document.addEventListener("click", e=>{
 
   const mp=e.target.closest("[data-mealphoto]");
   if(mp){ mealPhotoTarget=mp.dataset.mealphoto; mealPhotoInput.click(); return; }
+
+  const saveM=e.target.closest("[data-savemeal]");
+  if(saveM){ openSaveMeal(saveM.dataset.savemeal); return; }
+
+  const tplDel=e.target.closest("[data-tpldel]");
+  if(tplDel){
+    const t=state.savedMeals.find(x=>x.id===tplDel.dataset.tpldel);
+    if(t && confirm('Delete saved meal "'+t.name+'"? Logged entries stay put.')){
+      state.savedMeals=state.savedMeals.filter(x=>x.id!==t.id);
+      save();
+      const s=$("#pickerSearch");
+      if(isOpen("pickerScrim")) renderPickerList(s? s.value:"");
+      toast("Saved meal deleted");
+    }
+    return;
+  }
+
+  const tplAdd=e.target.closest("[data-mealtpl]");
+  if(tplAdd){ addSavedMeal(tplAdd.dataset.mealtpl); return; }
 
   const dbEdit=e.target.closest("[data-dbedit]");
   if(dbEdit){ openNewFoodFormInDB(foodById(dbEdit.dataset.dbedit)); return; }
