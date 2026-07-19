@@ -484,6 +484,85 @@ const SEED_FOODS = [
   {name:"Apple", brand:"", serving:1, unit:"medium", gw:182, kcal:95, p:0.5, c:25, f:0.3},
   {name:"Coffee, black", brand:"", serving:1, unit:"cup", gw:240, kcal:2, p:0.3, c:0, f:0},
   {name:"Sweet potato, baked", brand:"", serving:1, unit:"medium", gw:114, kcal:112, p:2, c:26, f:0.1},
+  /* -- dairy & fats -- */
+  {name:"Milk, whole", brand:"", serving:1, unit:"cup", gw:244, kcal:149, p:7.7, c:11.7, f:7.9},
+  {name:"Milk, semi-skimmed", brand:"", serving:1, unit:"cup", gw:244, kcal:122, p:8.1, c:11.7, f:4.8},
+  {name:"Cheddar cheese", brand:"", serving:28, unit:"g", kcal:113, p:6.4, c:0.9, f:9.3},
+  {name:"Mozzarella", brand:"", serving:28, unit:"g", kcal:85, p:6.3, c:0.6, f:6.3},
+  {name:"Cottage cheese", brand:"", serving:113, unit:"g", kcal:92, p:12, c:4.5, f:2.5},
+  {name:"Butter", brand:"", serving:1, unit:"tbsp", gw:14, kcal:102, p:0.1, c:0, f:11.5},
+  {name:"Mayonnaise", brand:"", serving:1, unit:"tbsp", gw:13, kcal:94, p:0.1, c:0.1, f:10.3},
+  /* -- protein -- */
+  {name:"Tuna, canned in water", brand:"", serving:1, unit:"can", gw:120, kcal:128, p:28, c:0, f:1},
+  {name:"Ground beef 90/10, cooked", brand:"", serving:100, unit:"g", kcal:217, p:26, c:0, f:12},
+  {name:"Bacon", brand:"", serving:2, unit:"slices", gw:16, kcal:87, p:6, c:0.2, f:7},
+  {name:"Turkey breast, deli", brand:"", serving:56, unit:"g", kcal:59, p:12, c:1.4, f:0.5},
+  {name:"Ham, deli", brand:"", serving:56, unit:"g", kcal:61, p:9.3, c:1.5, f:2.2},
+  {name:"Pork sausage, cooked", brand:"", serving:1, unit:"link", gw:45, kcal:148, p:8, c:1, f:12.5},
+  {name:"Shrimp, cooked", brand:"", serving:85, unit:"g", kcal:84, p:20, c:0, f:0.9},
+  {name:"Cod, baked", brand:"", serving:120, unit:"g", kcal:105, p:23, c:0, f:0.9},
+  {name:"Tofu, firm", brand:"", serving:100, unit:"g", kcal:76, p:8, c:1.9, f:4.8},
+  {name:"Whey protein", brand:"", serving:1, unit:"scoop", gw:30, kcal:120, p:24, c:3, f:1.5},
+  {name:"Protein bar", brand:"", serving:1, unit:"bar", gw:60, kcal:220, p:20, c:23, f:8},
+  /* -- grains, legumes & starches -- */
+  {name:"Pasta, cooked", brand:"", serving:1, unit:"cup", gw:140, kcal:220, p:8.1, c:43, f:1.3},
+  {name:"Potato, boiled", brand:"", serving:1, unit:"medium", gw:173, kcal:150, p:3, c:34, f:0.2},
+  {name:"French fries", brand:"", serving:117, unit:"g", kcal:365, p:4, c:48, f:17},
+  {name:"Lentils, cooked", brand:"", serving:1, unit:"cup", gw:198, kcal:230, p:18, c:40, f:0.8},
+  {name:"Chickpeas, cooked", brand:"", serving:1, unit:"cup", gw:164, kcal:269, p:14.5, c:45, f:4.2},
+  {name:"Black beans, cooked", brand:"", serving:1, unit:"cup", gw:172, kcal:227, p:15, c:41, f:0.9},
+  {name:"Quinoa, cooked", brand:"", serving:1, unit:"cup", gw:185, kcal:222, p:8.1, c:39, f:3.6},
+  {name:"Oats, dry", brand:"", serving:0.5, unit:"cup", gw:40, kcal:152, p:5.3, c:27, f:2.6},
+  {name:"White bread", brand:"", serving:1, unit:"slice", gw:25, kcal:67, p:2, c:12.7, f:0.8},
+  {name:"Bagel", brand:"", serving:1, unit:"medium", gw:105, kcal:277, p:11, c:55, f:1.4},
+  {name:"Flour tortilla, large", brand:"", serving:1, unit:"tortilla", gw:72, kcal:218, p:6, c:36, f:5.8},
+  {name:"Granola", brand:"", serving:0.5, unit:"cup", gw:55, kcal:245, p:5.5, c:35, f:9},
+  /* -- fruit & veg -- */
+  {name:"Orange", brand:"", serving:1, unit:"medium", gw:131, kcal:62, p:1.2, c:15.4, f:0.2},
+  {name:"Strawberries", brand:"", serving:1, unit:"cup", gw:152, kcal:49, p:1, c:11.7, f:0.5},
+  {name:"Grapes", brand:"", serving:1, unit:"cup", gw:151, kcal:104, p:1.1, c:27, f:0.2},
+  {name:"Tomato", brand:"", serving:1, unit:"medium", gw:123, kcal:22, p:1.1, c:4.8, f:0.2},
+  {name:"Cucumber, sliced", brand:"", serving:1, unit:"cup", gw:104, kcal:16, p:0.7, c:3.8, f:0.1},
+  {name:"Carrot", brand:"", serving:1, unit:"medium", gw:61, kcal:25, p:0.6, c:6, f:0.1},
+  {name:"Spinach, raw", brand:"", serving:2, unit:"cups", gw:60, kcal:14, p:1.7, c:2.2, f:0.2},
+  {name:"Onion", brand:"", serving:1, unit:"medium", gw:110, kcal:44, p:1.2, c:10.3, f:0.1},
+  {name:"Bell pepper", brand:"", serving:1, unit:"medium", gw:119, kcal:31, p:1, c:7.2, f:0.4},
+  {name:"Peas, cooked", brand:"", serving:1, unit:"cup", gw:160, kcal:134, p:8.6, c:25, f:0.4},
+  {name:"Sweetcorn, cooked", brand:"", serving:1, unit:"cup", gw:164, kcal:143, p:5.3, c:31, f:2.2},
+  {name:"Edamame, shelled", brand:"", serving:1, unit:"cup", gw:155, kcal:188, p:18.5, c:13.8, f:8.1},
+  /* -- nuts, snacks & extras -- */
+  {name:"Cashews", brand:"", serving:28, unit:"g", kcal:157, p:5.2, c:8.6, f:12.4},
+  {name:"Walnuts", brand:"", serving:28, unit:"g", kcal:185, p:4.3, c:3.9, f:18.5},
+  {name:"Chia seeds", brand:"", serving:2, unit:"tbsp", gw:24, kcal:118, p:4, c:10, f:7.5},
+  {name:"Hummus", brand:"", serving:2, unit:"tbsp", gw:30, kcal:70, p:2.3, c:6, f:5},
+  {name:"Honey", brand:"", serving:1, unit:"tbsp", gw:21, kcal:64, p:0.1, c:17.3, f:0},
+  {name:"Ketchup", brand:"", serving:1, unit:"tbsp", gw:17, kcal:17, p:0.2, c:4.5, f:0},
+  {name:"Dark chocolate 70%", brand:"", serving:28, unit:"g", kcal:170, p:2.2, c:12.8, f:12},
+  {name:"Milk chocolate", brand:"", serving:28, unit:"g", kcal:152, p:2.1, c:16.8, f:8.5},
+  {name:"Potato chips", brand:"", serving:28, unit:"g", kcal:152, p:1.8, c:15, f:9.8},
+  {name:"Ice cream, vanilla", brand:"", serving:0.5, unit:"cup", gw:66, kcal:137, p:2.3, c:15.6, f:7.3},
+  /* -- drinks -- */
+  {name:"Cola", brand:"", serving:1, unit:"can", gw:355, kcal:139, p:0, c:39, f:0},
+  {name:"Orange juice", brand:"", serving:1, unit:"cup", gw:248, kcal:112, p:1.7, c:25.8, f:0.5},
+  {name:"Beer", brand:"", serving:1, unit:"can", gw:355, kcal:153, p:1.6, c:12.6, f:0},
+  {name:"Red wine", brand:"", serving:1, unit:"glass", gw:147, kcal:125, p:0.1, c:3.8, f:0},
+  /* -- Huel (label values; Hot & Savoury per ~1 dry pack serving) -- */
+  {name:"Black Edition", brand:"Huel", serving:2, unit:"scoops", gw:90, kcal:400, p:40, c:24, f:18},
+  {name:"Hot & Savoury Spaghetti Carbonara", brand:"Huel", serving:1, unit:"serving", gw:99, kcal:400, p:25, c:52, f:11},
+  {name:"Hot & Savoury Pasta Bolognese", brand:"Huel", serving:1, unit:"serving", gw:101, kcal:400, p:25, c:55, f:10},
+  {name:"Hot & Savoury Mac & Cheeze", brand:"Huel", serving:1, unit:"serving", gw:93, kcal:400, p:24, c:42, f:14},
+  {name:"Hot & Savoury Cajun Pasta", brand:"Huel", serving:1, unit:"serving", gw:94, kcal:400, p:25, c:43, f:13},
+  {name:"Hot & Savoury Chick'n & Mushroom Pasta", brand:"Huel", serving:1, unit:"serving", gw:94, kcal:400, p:24, c:44, f:13},
+  {name:"Hot & Savoury Tomato & Herb", brand:"Huel", serving:1, unit:"serving", gw:93, kcal:400, p:24, c:39, f:15},
+  {name:"Hot & Savoury Thai Green Curry", brand:"Huel", serving:1, unit:"serving", gw:93, kcal:401, p:24, c:38, f:16},
+  {name:"Hot & Savoury Mexican Chili", brand:"Huel", serving:1, unit:"serving", gw:95, kcal:400, p:25, c:36, f:15},
+  {name:"Hot & Savoury Korma", brand:"Huel", serving:1, unit:"serving", gw:93, kcal:400, p:23, c:41, f:15},
+  {name:"Hot & Savoury Sweet & Sour", brand:"Huel", serving:1, unit:"serving", gw:93, kcal:400, p:22, c:46, f:13},
+  {name:"Hot & Savoury Madras", brand:"Huel", serving:1, unit:"serving", gw:95, kcal:400, p:24, c:37, f:16},
+  {name:"Hot & Savoury Yellow Coconut Curry", brand:"Huel", serving:1, unit:"serving", gw:93, kcal:400, p:22, c:45, f:14},
+  {name:"Noodles Korean BBQ", brand:"Huel", serving:1, unit:"pot", gw:107, kcal:400, p:22, c:62, f:9},
+  {name:"Noodles Spicy Gochujang", brand:"Huel", serving:1, unit:"pot", gw:107, kcal:400, p:22, c:64, f:8},
+  {name:"Noodles Chick'n Alfredo", brand:"Huel", serving:1, unit:"pot", gw:107, kcal:400, p:22, c:58, f:11},
 ];
 
 const store = {
@@ -499,6 +578,7 @@ const store = {
 function seedState(){
   return {
     goals:{kcal:2200, p:150, c:220, f:70},
+    seedCount: SEED_FOODS.length,
     foods: SEED_FOODS.map((f,i)=>({id:"seed"+i, photo:"", ...f})),
     log:{},        // { 'YYYY-MM-DD': [ {id, foodId, meal, servings, grams?} ] }
     mealPhotos:{}, // { 'YYYY-MM-DD': { breakfast:dataURL, ... } }
@@ -517,6 +597,13 @@ SEED_FOODS.forEach((sf,i)=>{
   const f = state.foods.find(x=>x.id==="seed"+i);
   if(f && f.gw==null && sf.gw!=null) f.gw = sf.gw;
 });
+// append seed foods added since this state was created (18 = original seed count);
+// only never-seen indices are added, so foods the user deleted stay deleted
+if(state.seedCount==null) state.seedCount = 18;
+for(let i=state.seedCount; i<SEED_FOODS.length; i++){
+  state.foods.push({id:"seed"+i, photo:"", ...SEED_FOODS[i]});
+}
+state.seedCount = Math.max(state.seedCount, SEED_FOODS.length);
 
 let current = todayKey();
 let editingFoodId = null; // when adding food, which meal
