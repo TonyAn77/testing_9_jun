@@ -218,6 +218,27 @@ body{
 .save-meal svg{width:16px;height:16px}
 .list-label{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);
   margin:2px 2px 8px}
+.pk-actions{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+.pk-action{flex:1;min-width:150px;display:flex;align-items:center;justify-content:center;gap:7px;padding:11px 12px;
+  border:1px solid var(--line);border-radius:12px;background:var(--surface-2);font-weight:700;font-size:12.5px;
+  color:var(--ink-2);transition:border-color .12s,color .12s}
+.pk-action:hover{border-color:var(--accent);color:var(--accent-deep)}
+.pk-action svg{width:15px;height:15px;flex:none}
+
+/* weight row in the day summary */
+.wt-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:12px;
+  padding:12px 14px;background:var(--surface-2);border-radius:12px}
+.wt-row .wt-l{font-size:11px;font-weight:700;color:var(--ink-3);text-transform:uppercase;letter-spacing:.05em}
+.wt-row .wt-v{font-weight:800;font-size:17px;letter-spacing:-.01em}
+.wt-row .wt-v small{font-weight:600;font-size:11px;color:var(--ink-3)}
+.wt-btn{padding:9px 14px;border-radius:10px;background:var(--surface);border:1px solid var(--line);
+  font-weight:700;font-size:12.5px;color:var(--ink-2);box-shadow:var(--shadow)}
+.wt-btn:hover{color:var(--accent-deep);border-color:var(--accent)}
+
+/* data (backup) modal */
+.data-actions{display:flex;flex-direction:column;gap:10px}
+.import-confirm{background:var(--accent-soft);border-radius:12px;padding:14px;margin-top:12px}
+.import-confirm .ic-t{font-weight:700;font-size:13.5px;color:var(--accent-deep);margin-bottom:10px}
 .meal-empty{padding:14px 16px;font-size:13px;color:var(--ink-3);font-weight:500}
 
 /* ---------- Modal ---------- */
@@ -352,6 +373,9 @@ body{
       <button class="icon-btn" id="dbBtn" title="Food database" aria-label="Manage food database">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v6c0 1.7 3.6 3 8 3s8-1.3 8-3V5M4 11v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"/></svg>
       </button>
+      <button class="icon-btn" id="dataBtn" title="Backup & export" aria-label="Backup and export your data">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+      </button>
     </div>
   </header>
 
@@ -421,6 +445,11 @@ body{
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v6m0 6v10M4.2 4.2l4.3 4.3m7 7l4.3 4.3M1 12h6m6 0h10"/></svg>
         Edit daily goals
       </button>
+
+      <div class="wt-row">
+        <div><div class="wt-l">Weight</div><div class="wt-v tnum" id="wtVal">—</div></div>
+        <button class="wt-btn" id="wtBtn">Log weight</button>
+      </div>
     </aside>
 
     <!-- Meals -->
@@ -460,6 +489,28 @@ body{
       <div class="calc-preview"><span class="cp-l">From macros</span><span class="cp-v tnum" id="gMacroKcal">0 <small>kcal</small></span></div>
       <button class="btn" id="saveGoals">Save goals</button>
     </div>
+  </div>
+</div>
+
+<!-- ============ Weight modal ============ -->
+<div class="scrim" id="weightScrim" role="dialog" aria-modal="true" aria-labelledby="weightTitle">
+  <div class="modal">
+    <div class="modal-head">
+      <h2 id="weightTitle">Log weight</h2>
+      <button class="modal-close" data-close="weightScrim" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+    </div>
+    <div class="modal-body" id="weightBody"></div>
+  </div>
+</div>
+
+<!-- ============ Backup & export modal ============ -->
+<div class="scrim" id="dataScrim" role="dialog" aria-modal="true" aria-labelledby="dataTitle">
+  <div class="modal">
+    <div class="modal-head">
+      <h2 id="dataTitle">Backup &amp; export</h2>
+      <button class="modal-close" data-close="dataScrim" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+    </div>
+    <div class="modal-body" id="dataBody"></div>
   </div>
 </div>
 
@@ -17495,7 +17546,9 @@ function seedState(){
     foods: SEED_FOODS.map((f,i)=>({id:"seed"+i, photo:"", ...f})),
     log:{},        // { 'YYYY-MM-DD': [ {id, foodId, meal, servings, grams?} ] }
     mealPhotos:{}, // { 'YYYY-MM-DD': { breakfast:dataURL, ... } }
-    savedMeals:[], // [ {id, name, items:[{foodId, servings, grams?}]} ]
+    savedMeals:[], // [ {id, name, items:[{foodId?, quick?, servings, grams?}]} ]
+    weights:{},    // { 'YYYY-MM-DD': kg }
+    weightUnit:"kg",
     theme:null
   };
 }
@@ -17505,6 +17558,8 @@ let state = store.read() || seedState();
 state.mealPhotos = state.mealPhotos || {};
 state.goals = state.goals || {kcal:2200,p:150,c:220,f:70};
 state.savedMeals = state.savedMeals || [];
+state.weights = state.weights || {};
+state.weightUnit = state.weightUnit || "kg";
 // backfill gram weights onto seed foods saved before grams mode existed
 SEED_FOODS.forEach((sf,i)=>{
   const f = state.foods.find(x=>x.id==="seed"+i);
@@ -17543,8 +17598,9 @@ function esc(s){ return String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;"
 
 function dayEntries(){ return state.log[current] || []; }
 function entryTotals(e){
+  const m=e.servings||1;
+  if(e.quick) return {kcal:(+e.quick.kcal||0)*m, p:(+e.quick.p||0)*m, c:(+e.quick.c||0)*m, f:(+e.quick.f||0)*m};
   const food=foodById(e.foodId); if(!food) return {kcal:0,p:0,c:0,f:0};
-  const m=e.servings;
   return {kcal:food.kcal*m, p:food.p*m, c:food.c*m, f:food.f*m};
 }
 function dayTotals(){
@@ -17803,9 +17859,38 @@ function renderWeek(){
   } else {
     stats=`<div class="week-empty">Nothing logged this week yet — tap a day to start.</div>`;
   }
+  // weight trend for the week (its own chart — never a second axis on the bars)
+  let weightHtml="";
+  const wpts=days.map((d,i)=>({i, kg:state.weights[d.k]})).filter(p=>p.kg!=null);
+  if(wpts.length){
+    const u=state.weightUnit, vals=wpts.map(p=>kgToUnit(p.kg));
+    const lo=Math.min(...vals), hi=Math.max(...vals);
+    const pad=Math.max((hi-lo)*0.35, 0.6);
+    const WH=110, wy=v=>18+(WH-36)*(1-(v-(lo-pad))/((hi+pad)-(lo-pad)));
+    const cx=i=>slot*i+slot/2;
+    let wsvg="";
+    wsvg+=`<line x1="0" y1="${WH-10}" x2="${W}" y2="${WH-10}" stroke="var(--line)" stroke-width="1" opacity="0.6"/>`;
+    if(wpts.length>1){
+      wsvg+=`<path d="${wpts.map((p,j)=>(j?"L":"M")+cx(p.i)+" "+wy(kgToUnit(p.kg))).join(" ")}"
+        fill="none" stroke="var(--accent)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>`;
+    }
+    wpts.forEach((p,j)=>{
+      const v=kgToUnit(p.kg);
+      wsvg+=`<circle cx="${cx(p.i)}" cy="${wy(v)}" r="4.5" fill="var(--accent)" stroke="var(--surface)" stroke-width="2"/>`;
+      if(j===0||j===wpts.length-1){
+        wsvg+=`<text x="${cx(p.i)}" y="${wy(v)-9}" text-anchor="middle" font-size="12" font-weight="700"
+          fill="var(--ink-2)" style="font-variant-numeric:tabular-nums">${(Math.round(v*10)/10)}</text>`;
+      }
+    });
+    const delta=wpts.length>1? Math.round((kgToUnit(wpts[wpts.length-1].kg)-kgToUnit(wpts[0].kg))*10)/10 : null;
+    weightHtml=`
+      <div class="list-label" style="margin-top:18px">Weight${delta!=null? ` · ${delta>0?"+":""}${delta} ${u} this week`:""} (${u})</div>
+      <svg class="weekchart" viewBox="0 0 ${W} ${WH}" role="img" aria-label="Weight this week in ${u}">${wsvg}</svg>`;
+  }
   $("#weekView").innerHTML=`
     <svg class="weekchart" viewBox="0 0 ${W} ${LBL}" role="img"
       aria-label="Calories per day this week, against a goal of ${g.kcal.toLocaleString()}">${svg}</svg>
+    ${weightHtml}
     ${stats}`;
 }
 function setView(v){
@@ -17837,6 +17922,12 @@ function renderSummary(){
   sr.classList.toggle("over", remain<0);
   // macros
   macroBar("p", t.p, g.p); macroBar("c", t.c, g.c); macroBar("f", t.f, g.f);
+  // weight for the selected day
+  const w=state.weights[current];
+  $("#wtVal").innerHTML = w!=null
+    ? (Math.round(kgToUnit(w)*10)/10)+' <small>'+state.weightUnit+'</small>'
+    : '<span style="color:var(--ink-3)">—</span>';
+  $("#wtBtn").textContent = w!=null? "Edit" : "Log weight";
 }
 function macroBar(k, now, goal){
   $("#"+k+"Now").textContent = r0(now);
@@ -17865,20 +17956,27 @@ function renderMeals(){
     if(entries.length){
       html += `<div class="meal-body">`;
       entries.forEach(e=>{
-        const food=foodById(e.foodId); if(!food) return;
+        let name, label, thumb;
+        if(e.quick){
+          name=e.quick.name||"Quick add"; label="Quick add";
+          thumb='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:17px;height:17px"><path d="M13 2L3 14h9l-1 8 10-12h-9z"/></svg>';
+        } else {
+          const food=foodById(e.foodId); if(!food) return;
+          name=food.name; label=servingLabel(food, e);
+          thumb=food.photo?`<img src="${food.photo}" alt="">`:esc(food.name[0]||"·").toUpperCase();
+        }
         const t=entryTotals(e);
-        const label = servingLabel(food, e);
         html += `<div class="entry">
-          <div class="entry-thumb">${food.photo?`<img src="${food.photo}" alt="">`:esc(food.name[0]||"·").toUpperCase()}</div>
+          <div class="entry-thumb">${thumb}</div>
           <div class="entry-main">
-            <div class="en">${esc(food.name)}</div>
+            <div class="en">${esc(name)}</div>
             <div class="es">${esc(label)}</div>
           </div>
           <div class="entry-macros">
             <span class="p">${r0(t.p)}g</span><span class="c">${r0(t.c)}g</span><span class="f">${r0(t.f)}g</span>
           </div>
           <div class="entry-kcal tnum">${r0(t.kcal)}</div>
-          <button class="entry-del" data-del="${e.id}" aria-label="Remove ${esc(food.name)}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m2 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg></button>
+          <button class="entry-del" data-del="${e.id}" aria-label="Remove ${esc(name)}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m2 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg></button>
         </div>`;
       });
       html += `</div>`;
@@ -17933,17 +18031,50 @@ function renderPickerList(q){
   });
   $("#newFoodBtn").addEventListener("click", ()=> openNewFoodForm($("#pickerSearch").value));
 }
+/* Foods ranked by how often and how recently they were logged */
+function recentFoods(){
+  const score=new Map();
+  const now=keyToDate(todayKey()).getTime();
+  for(const k in state.log){
+    const age=(now-keyToDate(k).getTime())/86400000;
+    if(age<0) continue;
+    const w=Math.max(0.15, 1/(1+age/7));
+    state.log[k].forEach(e=>{
+      if(!e.quick && foodById(e.foodId)) score.set(e.foodId,(score.get(e.foodId)||0)+w);
+    });
+  }
+  return [...score.entries()].sort((a,b)=>b[1]-a[1]).slice(0,8).map(([id])=>foodById(id));
+}
 function pickerListsHTML(q){
   const foods=filterFoods(q);
   const tpls=filterTemplates(q);
   const cat=filterCatalog(q);
-  let out="";
+  let out="", rec=[];
+  if(!(q||"").trim()){
+    let actions="";
+    const yest=(state.log[shiftDay(current,-1)]||[]).filter(e=>e.meal===editingFoodId&&(e.quick||foodById(e.foodId)));
+    if(yest.length){
+      const ykcal=r0(yest.reduce((s,e)=>s+entryTotals(e).kcal,0));
+      actions+=`<button class="pk-action" data-copyyest="1">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        Copy yesterday · ${yest.length} ${yest.length===1?"item":"items"}, ${ykcal.toLocaleString()} kcal</button>`;
+    }
+    actions+=`<button class="pk-action" data-quickadd="1">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9z"/></svg>
+      Quick add calories</button>`;
+    out+=`<div class="pk-actions">${actions}</div>`;
+    rec=recentFoods();
+    if(rec.length){
+      out+=`<div class="list-label">Recent &amp; frequent</div>
+        <div class="food-list" style="margin-bottom:14px">${rec.map(foodRowHTML).join("")}</div>`;
+    }
+  }
   if(tpls.length){
     out += `<div class="list-label">Saved meals</div>
       <div class="food-list" style="margin-bottom:14px">${tpls.map(tplRowHTML).join("")}</div>`;
   }
   if(foods.length){
-    if(tpls.length||cat.length) out += `<div class="list-label">Your foods</div>`;
+    if(tpls.length||cat.length||rec.length) out += `<div class="list-label">${rec.length?"All foods":"Your foods"}</div>`;
     out += `<div class="food-list">${foods.map(foodRowHTML).join("")}</div>`;
   } else if(!cat.length){
     out += `<div class="food-list">${emptyFoodsHTML(q)}</div>`;
@@ -18015,8 +18146,8 @@ function filterTemplates(q){
   return list.sort((a,b)=>a.name.localeCompare(b.name));
 }
 function tplRowHTML(t){
-  const items=t.items.filter(it=>foodById(it.foodId));
-  const kcal=r0(items.reduce((s,it)=>s+foodById(it.foodId).kcal*it.servings,0));
+  const items=t.items.filter(it=>it.quick||foodById(it.foodId));
+  const kcal=r0(items.reduce((s,it)=>s+(it.quick? (+it.quick.kcal||0) : foodById(it.foodId).kcal)*(it.servings||1),0));
   return `<div style="display:flex;gap:8px;align-items:center">
     <button class="food-row" data-mealtpl="${t.id}" style="flex:1">
       <div class="fr-thumb" style="background:var(--accent-soft);color:var(--accent-deep)">
@@ -18033,25 +18164,205 @@ function tplRowHTML(t){
 }
 function addSavedMeal(tplId){
   const tpl=state.savedMeals.find(t=>t.id===tplId); if(!tpl) return;
-  const items=tpl.items.filter(it=>foodById(it.foodId));
+  const items=tpl.items.filter(it=>it.quick||foodById(it.foodId));
   if(!items.length){ toast("The foods in this saved meal are no longer in your database",true); return; }
   if(!state.log[current]) state.log[current]=[];
   let kcal=0;
   items.forEach(it=>{
-    const entry={id:uid(), foodId:it.foodId, meal:editingFoodId, servings:it.servings};
+    const entry={id:uid(), meal:editingFoodId, servings:it.servings||1};
+    if(it.quick){ entry.quick={...it.quick}; kcal+=(+it.quick.kcal||0)*(it.servings||1); }
+    else { entry.foodId=it.foodId; kcal+=foodById(it.foodId).kcal*(it.servings||1); }
     if(it.grams) entry.grams=it.grams;
     state.log[current].push(entry);
-    kcal+=foodById(it.foodId).kcal*it.servings;
   });
   save(); render(); closeModal("pickerScrim");
   const missing=tpl.items.length-items.length;
   toast(`"${tpl.name}" added — ${items.length} ${items.length===1?"item":"items"}, ${r0(kcal)} kcal`+(missing?` (${missing} no longer in database)`:""));
 }
 
+/* ---- copy yesterday's meal ---- */
+function copyYesterday(){
+  const yest=(state.log[shiftDay(current,-1)]||[]).filter(e=>e.meal===editingFoodId&&(e.quick||foodById(e.foodId)));
+  if(!yest.length) return;
+  if(!state.log[current]) state.log[current]=[];
+  let kcal=0;
+  yest.forEach(e=>{
+    const ne={id:uid(), meal:e.meal, servings:e.servings};
+    if(e.quick) ne.quick={...e.quick}; else ne.foodId=e.foodId;
+    if(e.grams) ne.grams=e.grams;
+    state.log[current].push(ne);
+    kcal+=entryTotals(e).kcal;
+  });
+  save(); render(); closeModal("pickerScrim");
+  toast(`Copied yesterday — ${yest.length} ${yest.length===1?"item":"items"}, ${r0(kcal).toLocaleString()} kcal`);
+}
+
+/* ---- quick add calories ---- */
+function renderQuickAdd(){
+  const body=$("#pickerBody");
+  $("#pickerTitle").textContent="Quick add";
+  body.innerHTML=`
+    <div class="field"><label for="qaName">Description <span style="text-transform:none;color:var(--ink-3);font-weight:500">(optional)</span></label>
+      <input id="qaName" type="text" placeholder="e.g. Restaurant lunch"></div>
+    <div class="field"><label for="qaKcal">Calories</label>
+      <input id="qaKcal" type="number" min="0" step="any" inputmode="decimal" placeholder="kcal"></div>
+    <div class="field-row-3">
+      <div class="field"><label for="qaP">Protein (g)</label><input id="qaP" type="number" min="0" step="any" inputmode="decimal" placeholder="—"></div>
+      <div class="field"><label for="qaC">Carbs (g)</label><input id="qaC" type="number" min="0" step="any" inputmode="decimal" placeholder="—"></div>
+      <div class="field"><label for="qaF">Fat (g)</label><input id="qaF" type="number" min="0" step="any" inputmode="decimal" placeholder="—"></div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-ghost" id="qaBack" style="flex:0 0 34%">Back</button>
+      <button class="btn" id="qaAdd">Add to ${MEALS.find(m=>m.id===editingFoodId).name.toLowerCase()}</button>
+    </div>`;
+  setTimeout(()=>$("#qaKcal").focus(),100);
+  $("#qaBack").onclick=()=>{ $("#pickerTitle").textContent="Add to "+MEALS.find(m=>m.id===editingFoodId).name; renderPickerList(""); };
+  $("#qaAdd").onclick=()=>{
+    const kcal=+$("#qaKcal").value||0;
+    if(!kcal){ toast("Enter the calories",true); return; }
+    if(!state.log[current]) state.log[current]=[];
+    state.log[current].push({id:uid(), meal:editingFoodId, servings:1,
+      quick:{name:$("#qaName").value.trim()||"Quick add", kcal, p:+$("#qaP").value||0, c:+$("#qaC").value||0, f:+$("#qaF").value||0}});
+    save(); render(); closeModal("pickerScrim");
+    toast(r0(kcal).toLocaleString()+" kcal added");
+  };
+}
+
+/* ---- weight log ---- */
+function kgToUnit(kg){ return state.weightUnit==="lb"? kg*2.20462 : kg; }
+function unitToKg(v){ return state.weightUnit==="lb"? v/2.20462 : v; }
+function openWeight(){
+  const body=$("#weightBody");
+  const d=keyToDate(current);
+  const existing=state.weights[current];
+  const draw=()=>{
+    const u=state.weightUnit;
+    body.innerHTML=`
+      <div class="hint" style="margin-bottom:12px;font-size:13px">${esc(d.toLocaleDateString(undefined,{weekday:"long",month:"long",day:"numeric"}))}</div>
+      <div class="seg" style="margin-bottom:14px">
+        <button id="wuKg" class="${u==="kg"?"on":""}">kg</button>
+        <button id="wuLb" class="${u==="lb"?"on":""}">lb</button>
+      </div>
+      <div class="field"><label for="wtInput">Weight (${u})</label>
+        <input id="wtInput" type="number" min="0" step="0.1" inputmode="decimal"
+          value="${existing!=null? (Math.round(kgToUnit(existing)*10)/10) : ""}" placeholder="e.g. ${u==="kg"?"75.0":"165.0"}"></div>
+      <div class="btn-row">
+        ${existing!=null? `<button class="btn btn-ghost" id="wtRemove" style="flex:0 0 34%;color:var(--danger)">Remove</button>`:""}
+        <button class="btn" id="wtSave">Save</button>
+      </div>`;
+    $("#wuKg").onclick=()=>{ if(state.weightUnit!=="kg"){ state.weightUnit="kg"; save(); draw(); } };
+    $("#wuLb").onclick=()=>{ if(state.weightUnit!=="lb"){ state.weightUnit="lb"; save(); draw(); } };
+    const rm=$("#wtRemove");
+    if(rm) rm.onclick=()=>{ delete state.weights[current]; save(); render(); closeModal("weightScrim"); toast("Weight entry removed"); };
+    $("#wtSave").onclick=()=>{
+      const v=parseFloat($("#wtInput").value);
+      if(!v||v<=0){ toast("Enter your weight",true); return; }
+      state.weights[current]=Math.round(unitToKg(v)*100)/100;
+      save(); render(); closeModal("weightScrim"); toast("Weight logged");
+    };
+  };
+  draw();
+  openModal("weightScrim");
+  setTimeout(()=>{ const i=$("#wtInput"); if(i) i.focus(); },260);
+}
+
+/* ---- backup & export ---- */
+async function downloadFile(filename, text){
+  const cl=window.claude && window.claude.downloads;
+  if(cl){
+    try{
+      await cl.save({filename, data:text});
+      toast("Saved "+filename);
+      return;
+    }catch(err){
+      const code=err&&err.code;
+      if(code==="declined"){ toast("Save cancelled",true); return; }
+      if(code==="rate_limited"){ toast("One save at a time — try again in a moment",true); return; }
+      // other codes: saves unusable here — fall through to a plain download attempt
+    }
+  }
+  try{
+    const a=document.createElement("a");
+    a.href=URL.createObjectURL(new Blob([text],{type:"application/octet-stream"}));
+    a.download=filename;
+    document.body.appendChild(a); a.click();
+    setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); },1500);
+    toast("Downloading "+filename);
+  }catch(err){ toast("Couldn't save the file here",true); }
+}
+function csvCell(s){ s=String(s==null?"":s); return /[",\n]/.test(s)? '"'+s.replace(/"/g,'""')+'"' : s; }
+function buildCSV(){
+  const rows=[["date","meal","food","brand","amount","kcal","protein_g","carbs_g","fat_g"]];
+  Object.keys(state.log).sort().forEach(k=>{
+    state.log[k].forEach(e=>{
+      const t=entryTotals(e);
+      let name,brand="",amount;
+      if(e.quick){ name=e.quick.name; amount="quick add"; }
+      else{
+        const f=foodById(e.foodId); if(!f) return;
+        name=f.name; brand=f.brand||""; amount=servingLabel(f,e).replace(brand? brand+" · ":"","");
+      }
+      rows.push([k, e.meal, name, brand, amount, r0(t.kcal), r1(t.p), r1(t.c), r1(t.f)]);
+    });
+  });
+  return rows.map(r=>r.map(csvCell).join(",")).join("\n");
+}
+let pendingImport=null;
+function renderDataModal(){
+  pendingImport=null;
+  const days=Object.keys(state.log).filter(k=>state.log[k].length).length;
+  $("#dataBody").innerHTML=`
+    <div class="hint" style="margin-bottom:14px;font-size:13px">Your data lives only in this browser —
+      ${state.foods.length.toLocaleString()} foods, ${days} logged ${days===1?"day":"days"},
+      ${Object.keys(state.weights).length} weigh-ins. Download a backup now and then.</div>
+    <div class="data-actions">
+      <button class="btn" id="expJson">Download backup (JSON)</button>
+      <button class="btn btn-ghost" id="expCsv">Download food log (CSV as .txt)</button>
+      <label class="new-food-cta" style="margin-top:2px">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+        Restore from backup
+        <input type="file" accept=".json,application/json" class="sr" id="impJson">
+      </label>
+    </div>
+    <div id="importArea"></div>`;
+  $("#expJson").onclick=()=>{
+    downloadFile("plate-backup-"+todayKey()+".json", JSON.stringify(state));
+  };
+  $("#expCsv").onclick=()=>{
+    downloadFile("plate-log-"+todayKey()+".txt", buildCSV());
+  };
+  $("#impJson").addEventListener("change", ev=>{
+    const file=ev.target.files[0]; if(!file) return;
+    const reader=new FileReader();
+    reader.onload=()=>{
+      let obj=null;
+      try{ obj=JSON.parse(reader.result); }catch(err){}
+      if(!obj || !Array.isArray(obj.foods) || typeof obj.log!=="object" || !obj.goals){
+        toast("That file doesn't look like a Plate backup",true); return;
+      }
+      pendingImport=obj;
+      const d=Object.keys(obj.log||{}).filter(k=>(obj.log[k]||[]).length).length;
+      $("#importArea").innerHTML=`
+        <div class="import-confirm">
+          <div class="ic-t">Backup with ${(obj.foods||[]).length.toLocaleString()} foods and ${d} logged ${d===1?"day":"days"}.
+            Restoring replaces everything currently in the app.</div>
+          <button class="btn" id="impGo" style="background:var(--danger)">Replace my data</button>
+        </div>`;
+      $("#impGo").onclick=()=>{
+        try{ localStorage.setItem("plate.v1", JSON.stringify(pendingImport)); }
+        catch(err){ toast("Backup too large to store here",true); return; }
+        location.reload();
+      };
+    };
+    reader.readAsText(file);
+    ev.target.value="";
+  });
+}
+
 /* ---- save current meal as a template ---- */
 function openSaveMeal(mealId){
   const meal=MEALS.find(m=>m.id===mealId);
-  const entries=dayEntries().filter(e=>e.meal===mealId && foodById(e.foodId));
+  const entries=dayEntries().filter(e=>e.meal===mealId && (e.quick||foodById(e.foodId)));
   if(!entries.length){ toast("Nothing to save yet",true); return; }
   const total=r0(entries.reduce((s,e)=>s+entryTotals(e).kcal,0));
   const body=$("#saveBody");
@@ -18062,10 +18373,14 @@ function openSaveMeal(mealId){
     <div class="list-label">What's inside</div>
     <div class="food-list" style="margin-bottom:14px">
       ${entries.map(e=>{
-        const f=foodById(e.foodId), t=entryTotals(e);
+        const t=entryTotals(e);
+        let nm, sub, th;
+        if(e.quick){ nm=e.quick.name||"Quick add"; sub="Quick add"; th="⚡"; }
+        else{ const f=foodById(e.foodId); nm=f.name; sub=servingLabel(f,e);
+          th=f.photo?`<img src="${f.photo}" alt="">`:esc((f.name[0]||"·").toUpperCase()); }
         return `<div class="food-row" style="cursor:default">
-          <div class="fr-thumb">${f.photo?`<img src="${f.photo}" alt="">`:esc((f.name[0]||"·").toUpperCase())}</div>
-          <div class="fr-main"><div class="fr-name">${esc(f.name)}</div><div class="fr-sub">${esc(servingLabel(f,e))}</div></div>
+          <div class="fr-thumb">${th}</div>
+          <div class="fr-main"><div class="fr-name">${esc(nm)}</div><div class="fr-sub">${esc(sub)}</div></div>
           <div class="fr-kcal tnum">${r0(t.kcal)}<small>kcal</small></div>
         </div>`;
       }).join("")}
@@ -18078,7 +18393,8 @@ function openSaveMeal(mealId){
     const name=$("#svName").value.trim();
     if(!name){ toast("Give the meal a name",true); return; }
     const items=entries.map(e=>{
-      const it={foodId:e.foodId, servings:e.servings};
+      const it={servings:e.servings};
+      if(e.quick) it.quick={...e.quick}; else it.foodId=e.foodId;
       if(e.grams) it.grams=e.grams;
       return it;
     });
@@ -18531,6 +18847,12 @@ document.addEventListener("click", e=>{
   const goday=e.target.closest("[data-goday]");
   if(goday){ current=goday.dataset.goday; setView("day"); return; }
 
+  const cy=e.target.closest("[data-copyyest]");
+  if(cy){ copyYesterday(); return; }
+
+  const qa=e.target.closest("[data-quickadd]");
+  if(qa){ renderQuickAdd(); return; }
+
   const dbEdit=e.target.closest("[data-dbedit]");
   if(dbEdit){ openNewFoodFormInDB(foodById(dbEdit.dataset.dbedit)); return; }
 
@@ -18558,6 +18880,8 @@ $("#nextDay").onclick=()=>{ current=shiftDay(current, view==="week"? 7: 1); rend
 $("#viewDay").onclick=()=>setView("day");
 $("#viewWeek").onclick=()=>setView("week");
 $("#goalBtn").onclick=openGoals;
+$("#wtBtn").onclick=openWeight;
+$("#dataBtn").onclick=()=>{ renderDataModal(); openModal("dataScrim"); };
 $("#dbBtn").onclick=()=>{ renderDB(); openModal("dbScrim"); };
 $("#themeBtn").onclick=()=>{
   const dark = state.theme==="dark" || (!state.theme && matchMedia("(prefers-color-scheme:dark)").matches);
