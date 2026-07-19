@@ -175,6 +175,8 @@ body{
 .entry-del{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;color:var(--ink-3);flex:none}
 .entry-del:hover{color:var(--danger);background:var(--surface-2)}
 .entry-del svg{width:16px;height:16px}
+.entry-del.armed{background:var(--danger);color:#fff;font-weight:800;font-size:14px}
+.entry-del.armed:hover{color:#fff}
 @media (max-width:520px){.entry-macros{display:none}}
 
 .meal-foot{display:flex;align-items:stretch;border-top:1px solid var(--line)}
@@ -17755,8 +17757,9 @@ function renderMeals(){
     wrap.appendChild(card);
   });
 }
+/* Plain text — callers escape for HTML */
 function servingLabel(food, e){
-  const brand = food.brand? esc(food.brand)+" · " : "";
+  const brand = food.brand? food.brand+" · " : "";
   if(e.grams) return `${brand}${r1(e.grams)} g`;
   const qty = r1(food.serving*e.servings);
   const unit = food.unit || "serving";
@@ -17922,7 +17925,7 @@ function openSaveMeal(mealId){
         const f=foodById(e.foodId), t=entryTotals(e);
         return `<div class="food-row" style="cursor:default">
           <div class="fr-thumb">${f.photo?`<img src="${f.photo}" alt="">`:esc((f.name[0]||"·").toUpperCase())}</div>
-          <div class="fr-main"><div class="fr-name">${esc(f.name)}</div><div class="fr-sub">${servingLabel(f,e)}</div></div>
+          <div class="fr-main"><div class="fr-name">${esc(f.name)}</div><div class="fr-sub">${esc(servingLabel(f,e))}</div></div>
           <div class="fr-kcal tnum">${r0(t.kcal)}<small>kcal</small></div>
         </div>`;
       }).join("")}
@@ -18290,6 +18293,21 @@ function openModal(id){ $("#"+id).classList.add("on"); document.body.style.overf
 function closeModal(id){ $("#"+id).classList.remove("on"); document.body.style.overflow=""; }
 function isOpen(id){ return $("#"+id).classList.contains("on"); }
 
+/* Two-tap delete: first tap arms the button ("?" on red) for 2.6s, second tap
+   confirms. Native confirm() can be silently blocked in sandboxed iframes. */
+function armDelete(btn){
+  if(btn.dataset.armed){ clearTimeout(+btn.dataset.armT||0); return true; }
+  btn.dataset.armed="1";
+  btn.classList.add("armed");
+  btn.dataset.prevHtml=btn.innerHTML;
+  btn.innerHTML="?";
+  btn.dataset.armT=setTimeout(()=>{
+    delete btn.dataset.armed; btn.classList.remove("armed");
+    btn.innerHTML=btn.dataset.prevHtml||"";
+  },2600);
+  return false;
+}
+
 let toastTimer=null;
 function toast(msg, isErr){
   const t=$("#toast");
@@ -18355,8 +18373,9 @@ document.addEventListener("click", e=>{
 
   const tplDel=e.target.closest("[data-tpldel]");
   if(tplDel){
+    if(!armDelete(tplDel)) return;
     const t=state.savedMeals.find(x=>x.id===tplDel.dataset.tpldel);
-    if(t && confirm('Delete saved meal "'+t.name+'"? Logged entries stay put.')){
+    if(t){
       state.savedMeals=state.savedMeals.filter(x=>x.id!==t.id);
       save();
       const s=$("#pickerSearch");
@@ -18374,10 +18393,11 @@ document.addEventListener("click", e=>{
 
   const dbDel=e.target.closest("[data-dbdel]");
   if(dbDel){
+    if(!armDelete(dbDel)) return;
     const f=foodById(dbDel.dataset.dbdel);
-    if(confirm('Delete "'+f.name+'" from your database? Existing log entries stay put.')){
+    if(f){
       state.foods=state.foods.filter(x=>x.id!==f.id);
-      save(); renderDB(); render(); toast("Food deleted");
+      save(); renderDB(); render(); toast("Food deleted — logged entries stay put");
     }
     return;
   }
