@@ -440,25 +440,26 @@ const MEALS = [
   {id:"snacks",    name:"Snacks",    emoji:"🍎"},
 ];
 
+/* gw = grams per serving; foods whose unit is already "g" derive it from `serving` */
 const SEED_FOODS = [
-  {name:"Oatmeal, cooked", brand:"", serving:1, unit:"cup", kcal:158, p:6, c:27, f:3},
-  {name:"Banana", brand:"", serving:1, unit:"medium", kcal:105, p:1.3, c:27, f:0.4},
+  {name:"Oatmeal, cooked", brand:"", serving:1, unit:"cup", gw:234, kcal:158, p:6, c:27, f:3},
+  {name:"Banana", brand:"", serving:1, unit:"medium", gw:118, kcal:105, p:1.3, c:27, f:0.4},
   {name:"Greek yogurt, plain", brand:"", serving:170, unit:"g", kcal:100, p:17, c:6, f:0.7},
-  {name:"Blueberries", brand:"", serving:1, unit:"cup", kcal:84, p:1.1, c:21, f:0.5},
-  {name:"Eggs, large", brand:"", serving:2, unit:"eggs", kcal:143, p:12.6, c:0.7, f:9.5},
-  {name:"Whole wheat bread", brand:"", serving:1, unit:"slice", kcal:82, p:4, c:14, f:1.1},
+  {name:"Blueberries", brand:"", serving:1, unit:"cup", gw:148, kcal:84, p:1.1, c:21, f:0.5},
+  {name:"Eggs, large", brand:"", serving:2, unit:"eggs", gw:100, kcal:143, p:12.6, c:0.7, f:9.5},
+  {name:"Whole wheat bread", brand:"", serving:1, unit:"slice", gw:32, kcal:82, p:4, c:14, f:1.1},
   {name:"Chicken breast, grilled", brand:"", serving:120, unit:"g", kcal:198, p:37, c:0, f:4.3},
-  {name:"White rice, cooked", brand:"", serving:1, unit:"cup", kcal:205, p:4.3, c:45, f:0.4},
-  {name:"Brown rice, cooked", brand:"", serving:1, unit:"cup", kcal:216, p:5, c:45, f:1.8},
-  {name:"Avocado", brand:"", serving:0.5, unit:"fruit", kcal:161, p:2, c:8.5, f:14.7},
+  {name:"White rice, cooked", brand:"", serving:1, unit:"cup", gw:158, kcal:205, p:4.3, c:45, f:0.4},
+  {name:"Brown rice, cooked", brand:"", serving:1, unit:"cup", gw:195, kcal:216, p:5, c:45, f:1.8},
+  {name:"Avocado", brand:"", serving:0.5, unit:"fruit", gw:100, kcal:161, p:2, c:8.5, f:14.7},
   {name:"Almonds", brand:"", serving:28, unit:"g", kcal:164, p:6, c:6, f:14},
   {name:"Salmon, baked", brand:"", serving:120, unit:"g", kcal:250, p:25, c:0, f:16},
-  {name:"Broccoli, steamed", brand:"", serving:1, unit:"cup", kcal:55, p:3.7, c:11, f:0.6},
-  {name:"Olive oil", brand:"", serving:1, unit:"tbsp", kcal:119, p:0, c:0, f:13.5},
-  {name:"Peanut butter", brand:"", serving:2, unit:"tbsp", kcal:188, p:8, c:6, f:16},
-  {name:"Apple", brand:"", serving:1, unit:"medium", kcal:95, p:0.5, c:25, f:0.3},
-  {name:"Coffee, black", brand:"", serving:1, unit:"cup", kcal:2, p:0.3, c:0, f:0},
-  {name:"Sweet potato, baked", brand:"", serving:1, unit:"medium", kcal:112, p:2, c:26, f:0.1},
+  {name:"Broccoli, steamed", brand:"", serving:1, unit:"cup", gw:156, kcal:55, p:3.7, c:11, f:0.6},
+  {name:"Olive oil", brand:"", serving:1, unit:"tbsp", gw:13.5, kcal:119, p:0, c:0, f:13.5},
+  {name:"Peanut butter", brand:"", serving:2, unit:"tbsp", gw:32, kcal:188, p:8, c:6, f:16},
+  {name:"Apple", brand:"", serving:1, unit:"medium", gw:182, kcal:95, p:0.5, c:25, f:0.3},
+  {name:"Coffee, black", brand:"", serving:1, unit:"cup", gw:240, kcal:2, p:0.3, c:0, f:0},
+  {name:"Sweet potato, baked", brand:"", serving:1, unit:"medium", gw:114, kcal:112, p:2, c:26, f:0.1},
 ];
 
 const store = {
@@ -485,6 +486,11 @@ let state = store.read() || seedState();
 // migrate missing keys
 state.mealPhotos = state.mealPhotos || {};
 state.goals = state.goals || {kcal:2200,p:150,c:220,f:70};
+// backfill gram weights onto seed foods saved before grams mode existed
+SEED_FOODS.forEach((sf,i)=>{
+  const f = state.foods.find(x=>x.id==="seed"+i);
+  if(f && f.gw==null && sf.gw!=null) f.gw = sf.gw;
+});
 
 let current = todayKey();
 let editingFoodId = null; // when adding food, which meal
@@ -500,6 +506,11 @@ function shiftDay(k,delta){ const d=keyToDate(k); d.setDate(d.getDate()+delta); 
 function r0(n){ return Math.round(n); }
 function r1(n){ return Math.round(n*10)/10; }
 function foodById(id){ return state.foods.find(f=>f.id===id); }
+function gramWeight(f){
+  const u=(f.unit||"").trim().toLowerCase();
+  if(u==="g"||u==="gram"||u==="grams") return +f.serving||0;
+  return +f.gw||0;
+}
 function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
 function save(){ store.write(state); }
 function esc(s){ return String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m])); }
@@ -597,7 +608,7 @@ function renderMeals(){
       entries.forEach(e=>{
         const food=foodById(e.foodId); if(!food) return;
         const t=entryTotals(e);
-        const label = servingLabel(food, e.servings);
+        const label = servingLabel(food, e);
         html += `<div class="entry">
           <div class="entry-thumb">${food.photo?`<img src="${food.photo}" alt="">`:esc(food.name[0]||"·").toUpperCase()}</div>
           <div class="entry-main">
@@ -622,10 +633,11 @@ function renderMeals(){
     wrap.appendChild(card);
   });
 }
-function servingLabel(food, mult){
-  const qty = r1(food.serving*mult);
-  const unit = food.unit || "serving";
+function servingLabel(food, e){
   const brand = food.brand? esc(food.brand)+" · " : "";
+  if(e.grams) return `${brand}${r1(e.grams)} g`;
+  const qty = r1(food.serving*e.servings);
+  const unit = food.unit || "serving";
   return `${brand}${qty} ${unit}`;
 }
 
@@ -689,9 +701,25 @@ function openQuantity(foodId){
   const food=foodById(foodId); if(!food) return;
   const body=$("#pickerBody");
   $("#pickerTitle").textContent = food.name;
-  let mult=1;
+  const gw = gramWeight(food);   // grams per 1 serving; 0 = unknown
+  let mode = "serv";             // "serv" | "g" — grams mode only offered when gw is known
+  let mult = 1;                  // servings multiplier; all nutrition math derives from this
+  let grams = gw ? Math.round(gw) : 0;
+  const equalsText=()=>{
+    if(mode==="g"){
+      let s = "= "+r1(mult)+(mult===1?" serving":" servings");
+      const u=(food.unit||"").trim().toLowerCase();
+      if(u!=="g"&&u!=="gram"&&u!=="grams") s += " ("+r1(food.serving*mult)+" "+food.unit+")";
+      return s;
+    }
+    let s = "= "+r1(food.serving*mult)+" "+food.unit;
+    const u=(food.unit||"").trim().toLowerCase();
+    if(gw && u!=="g"&&u!=="gram"&&u!=="grams") s += " · "+r0(gw*mult)+" g";
+    return s;
+  };
   const draw=()=>{
     const t={kcal:food.kcal*mult,p:food.p*mult,c:food.c*mult,f:food.f*mult};
+    const inGrams = mode==="g";
     body.innerHTML = `
       <div style="display:flex;gap:14px;align-items:center;margin-bottom:18px">
         <div class="fr-thumb" style="width:60px;height:60px;border-radius:16px;font-size:24px">${food.photo?`<img src="${food.photo}" alt="">`:esc((food.name[0]||"·").toUpperCase())}</div>
@@ -700,13 +728,17 @@ function openQuantity(foodId){
           <div style="font-size:13px;color:var(--ink-3);font-weight:600">${food.brand?esc(food.brand)+" · ":""}per ${r1(food.serving)} ${esc(food.unit)}: ${r0(food.kcal)} kcal</div>
         </div>
       </div>
-      <div class="field"><label>Number of servings</label>
+      ${gw? `<div class="seg" role="tablist" aria-label="Log by servings or grams">
+        <button id="segServ" class="${inGrams?"":"on"}" role="tab" aria-selected="${!inGrams}">Servings</button>
+        <button id="segG" class="${inGrams?"on":""}" role="tab" aria-selected="${inGrams}">Grams</button>
+      </div>`:""}
+      <div class="field"><label>${inGrams?"Amount (g)":"Number of servings"}</label>
         <div class="stepper">
-          <button id="qMinus" aria-label="Fewer">–</button>
-          <input id="qInput" type="number" min="0" step="0.5" value="${mult}" inputmode="decimal">
+          <button id="qMinus" aria-label="Less">–</button>
+          <input id="qInput" type="number" min="0" step="${inGrams?"5":"0.5"}" value="${inGrams?grams:mult}" inputmode="decimal">
           <button id="qPlus" aria-label="More">+</button>
         </div>
-        <div class="hint" id="qEquals">= ${r1(food.serving*mult)} ${esc(food.unit)}</div>
+        <div class="hint" id="qEquals">${equalsText()}</div>
       </div>
       <div class="field-row-3" style="margin-bottom:16px">
         ${miniStat("Protein","var(--protein)",r0(t.p)+"g")}
@@ -719,16 +751,33 @@ function openQuantity(foodId){
         <button class="btn" id="qAdd">Add to ${MEALS.find(m=>m.id===editingFoodId).name.toLowerCase()}</button>
       </div>`;
     const inp=$("#qInput");
-    $("#qMinus").onclick=()=>{ mult=Math.max(0.5, Math.round((mult-0.5)*2)/2); draw(); };
-    $("#qPlus").onclick =()=>{ mult=Math.round((mult+0.5)*2)/2; draw(); };
-    inp.oninput=()=>{ mult=Math.max(0, parseFloat(inp.value)||0); $("#qEquals").textContent="= "+r1(food.serving*mult)+" "+food.unit; };
-    inp.onchange=()=>{ if(!mult) mult=1; draw(); };
+    if(gw){
+      $("#segServ").onclick=()=>{ if(mode!=="serv"){ mode="serv"; draw(); } };
+      $("#segG").onclick=()=>{ if(mode!=="g"){ mode="g"; grams=Math.max(1,Math.round(gw*mult)); draw(); } };
+    }
+    $("#qMinus").onclick=()=>{
+      if(mode==="g"){ grams=Math.max(5, grams-10); mult=grams/gw; }
+      else mult=Math.max(0.5, Math.round((mult-0.5)*2)/2);
+      draw();
+    };
+    $("#qPlus").onclick =()=>{
+      if(mode==="g"){ grams+=10; mult=grams/gw; }
+      else mult=Math.round((mult+0.5)*2)/2;
+      draw();
+    };
+    inp.oninput=()=>{
+      const v=Math.max(0, parseFloat(inp.value)||0);
+      if(mode==="g"){ grams=v; mult=gw? v/gw : 0; } else mult=v;
+      $("#qEquals").textContent=equalsText();
+    };
+    inp.onchange=()=>{ if(!mult){ mult=1; grams=gw?Math.round(gw):0; } draw(); };
     $("#qBack").onclick=()=> renderPickerList("");
     $("#qAdd").onclick =()=>{
-      if(!mult){ toast("Enter a serving amount",true); return; }
-      dayEntries(); // ensure
+      if(!mult){ toast(mode==="g"?"Enter an amount in grams":"Enter a serving amount",true); return; }
       if(!state.log[current]) state.log[current]=[];
-      state.log[current].push({id:uid(), foodId:food.id, meal:editingFoodId, servings:mult});
+      const entry={id:uid(), foodId:food.id, meal:editingFoodId, servings:mult};
+      if(mode==="g") entry.grams=r1(grams);
+      state.log[current].push(entry);
       save(); render(); closeModal("pickerScrim");
       toast(food.name+" added");
     };
@@ -745,7 +794,7 @@ function miniStat(label,color,val){
 /* ---- new food form ---- */
 function openNewFoodForm(prefillName, existing){
   pendingPhoto = existing? (existing.photo||"") : "";
-  const f = existing || {name:prefillName||"", brand:"", serving:1, unit:"serving", kcal:"", p:"", c:"", f:""};
+  const f = existing || {name:prefillName||"", brand:"", serving:1, unit:"serving", gw:"", kcal:"", p:"", c:"", f:""};
   $("#pickerTitle").textContent = existing? "Edit food" : "New food";
   const body=$("#pickerBody");
   body.innerHTML = `
@@ -761,6 +810,9 @@ function openNewFoodForm(prefillName, existing){
       <div class="field"><label for="nfUnit">Unit</label>
         <input id="nfUnit" type="text" placeholder="g, cup, slice…" value="${esc(f.unit)}"></div>
     </div>
+    <div class="field"><label for="nfGw">Serving weight (g) <span style="text-transform:none;color:var(--ink-3);font-weight:500">(optional)</span></label>
+      <input id="nfGw" type="number" min="0" step="any" inputmode="decimal" placeholder="e.g. 150" value="${f.gw||""}">
+      <div class="hint">Lets you log this food by grams. Skip it if the unit is already grams.</div></div>
     <div class="field"><label>Nutrition per serving</label>
       <div class="field-row" style="margin-bottom:10px">
         <div><input id="nfKcal" type="number" min="0" step="any" inputmode="decimal" placeholder="Calories (kcal)" value="${f.kcal}"></div>
@@ -808,7 +860,9 @@ function openNewFoodForm(prefillName, existing){
       if(!btn){
         btn=document.createElement("button"); btn.type="button"; btn.className="clear-photo";
         btn.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>';
-        btn.onclick=(e)=>{ e.preventDefault(); e.stopPropagation(); pendingPhoto=""; openNewFoodForm(null, collectForm()); };
+        btn.onclick=(e)=>{ e.preventDefault(); e.stopPropagation(); pendingPhoto="";
+          drop.querySelectorAll("img,.clear-photo").forEach(n=>n.remove());
+          drop.querySelectorAll("svg,.pd-t,.pd-s").forEach(n=>{ n.style.opacity=""; }); };
         drop.appendChild(btn);
       }
     });
@@ -819,6 +873,7 @@ function openNewFoodForm(prefillName, existing){
       id: existing?existing.id:undefined,
       name:$("#nfName").value.trim(), brand:$("#nfBrand").value.trim(),
       serving:+$("#nfServing").value||1, unit:$("#nfUnit").value.trim()||"serving",
+      gw:+$("#nfGw").value||0,
       kcal:+$("#nfKcal").value||0, p:+$("#nfP").value||0, c:+$("#nfC").value||0, f:+$("#nfF").value||0,
       photo:pendingPhoto
     };
@@ -880,7 +935,7 @@ function openNewFoodFormInDB(existing){
   // Temporarily render the form into the DB body
   const body=$("#dbBody");
   pendingPhoto = existing? (existing.photo||"") : "";
-  const f = existing || {name:"",brand:"",serving:1,unit:"serving",kcal:"",p:"",c:"",f:""};
+  const f = existing || {name:"",brand:"",serving:1,unit:"serving",gw:"",kcal:"",p:"",c:"",f:""};
   body.innerHTML = document.getElementById("__formTemplate")?"":"";
   // Reuse openNewFoodForm markup by calling a shared builder:
   buildFoodForm(body, f, existing, ()=>renderDB());
@@ -899,6 +954,9 @@ function buildFoodForm(body, f, existing, onDone){
       <div class="field"><label for="dfUnit">Unit</label>
         <input id="dfUnit" type="text" placeholder="g, cup…" value="${esc(f.unit)}"></div>
     </div>
+    <div class="field"><label for="dfGw">Serving weight (g) <span style="text-transform:none;color:var(--ink-3);font-weight:500">(optional)</span></label>
+      <input id="dfGw" type="number" min="0" step="any" inputmode="decimal" placeholder="e.g. 150" value="${f.gw||""}">
+      <div class="hint">Lets you log this food by grams. Skip it if the unit is already grams.</div></div>
     <div class="field"><label>Nutrition per serving</label>
       <div class="field-row" style="margin-bottom:10px">
         <input id="dfKcal" type="number" min="0" step="any" placeholder="Calories (kcal)" value="${f.kcal}">
@@ -933,13 +991,15 @@ function buildFoodForm(body, f, existing, onDone){
   });
   function collect(){
     return {name:$("#dfName").value,brand:$("#dfBrand").value,serving:$("#dfServing").value,
-      unit:$("#dfUnit").value,kcal:$("#dfKcal").value,p:$("#dfP").value,c:$("#dfC").value,f:$("#dfF").value};
+      unit:$("#dfUnit").value,gw:$("#dfGw").value,
+      kcal:$("#dfKcal").value,p:$("#dfP").value,c:$("#dfC").value,f:$("#dfF").value};
   }
   $("#dfBack").onclick=onDone;
   $("#dfSave").onclick=()=>{
     const data={
       name:$("#dfName").value.trim(), brand:$("#dfBrand").value.trim(),
       serving:+$("#dfServing").value||1, unit:$("#dfUnit").value.trim()||"serving",
+      gw:+$("#dfGw").value||0,
       kcal:+$("#dfKcal").value||0,p:+$("#dfP").value||0,c:+$("#dfC").value||0,f:+$("#dfF").value||0,
       photo:pendingPhoto
     };
