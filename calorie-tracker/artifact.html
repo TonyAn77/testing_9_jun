@@ -1,0 +1,1068 @@
+<style>
+/* ---------- Reset ---------- */
+*,*::before,*::after{box-sizing:border-box}
+html,body{margin:0;padding:0}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer;border:none;background:none}
+img{max-width:100%;display:block}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:6px}
+
+/* ---------- Tokens ---------- */
+:root{
+  --bg:#F4F6F1;
+  --surface:#FFFFFF;
+  --surface-2:#ECEFE7;
+  --line:#DDE3D6;
+  --ink:#171C15;
+  --ink-2:#4E5A48;
+  --ink-3:#7B8674;
+  --accent:#3E8E5A;
+  --accent-deep:#2C6A42;
+  --accent-soft:#E1EFE4;
+  --protein:#E4572E;
+  --carbs:#E0A315;
+  --fat:#6C5CE7;
+  --danger:#C64236;
+  --shadow:0 1px 2px rgba(23,28,21,.04),0 8px 24px -12px rgba(23,28,21,.18);
+  --shadow-lg:0 24px 60px -24px rgba(23,28,21,.35);
+  --radius:16px;
+  --radius-sm:10px;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --bg:#12140F;
+    --surface:#1B1E17;
+    --surface-2:#232720;
+    --line:#333930;
+    --ink:#EDF0E7;
+    --ink-2:#AEB6A5;
+    --ink-3:#7C8574;
+    --accent:#63B87E;
+    --accent-deep:#8FD3A4;
+    --accent-soft:#22301F;
+    --protein:#F27A56;
+    --carbs:#F0BB4A;
+    --fat:#9B8CFB;
+    --danger:#E56D5F;
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 30px -14px rgba(0,0,0,.6);
+    --shadow-lg:0 30px 70px -24px rgba(0,0,0,.7);
+  }
+}
+:root[data-theme="light"]{
+  --bg:#F4F6F1;--surface:#FFFFFF;--surface-2:#ECEFE7;--line:#DDE3D6;
+  --ink:#171C15;--ink-2:#4E5A48;--ink-3:#7B8674;
+  --accent:#3E8E5A;--accent-deep:#2C6A42;--accent-soft:#E1EFE4;
+  --protein:#E4572E;--carbs:#E0A315;--fat:#6C5CE7;--danger:#C64236;
+  --shadow:0 1px 2px rgba(23,28,21,.04),0 8px 24px -12px rgba(23,28,21,.18);
+  --shadow-lg:0 24px 60px -24px rgba(23,28,21,.35);
+}
+:root[data-theme="dark"]{
+  --bg:#12140F;--surface:#1B1E17;--surface-2:#232720;--line:#333930;
+  --ink:#EDF0E7;--ink-2:#AEB6A5;--ink-3:#7C8574;
+  --accent:#63B87E;--accent-deep:#8FD3A4;--accent-soft:#22301F;
+  --protein:#F27A56;--carbs:#F0BB4A;--fat:#9B8CFB;--danger:#E56D5F;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 30px -14px rgba(0,0,0,.6);
+  --shadow-lg:0 30px 70px -24px rgba(0,0,0,.7);
+}
+
+/* ---------- Base ---------- */
+body{
+  background:var(--bg);color:var(--ink);font-family:var(--sans);
+  -webkit-font-smoothing:antialiased;line-height:1.5;
+  font-feature-settings:"ss01","cv01";
+}
+.tnum{font-variant-numeric:tabular-nums}
+.app{max-width:1120px;margin:0 auto;padding:20px 20px 96px}
+
+/* ---------- Topbar ---------- */
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:20px}
+.brand{display:flex;align-items:center;gap:11px}
+.mark{width:38px;height:38px;border-radius:11px;background:linear-gradient(150deg,var(--accent),var(--accent-deep));
+  display:grid;place-items:center;box-shadow:var(--shadow);flex:none}
+.mark svg{width:22px;height:22px}
+.brand h1{font-size:20px;letter-spacing:-.02em;margin:0;font-weight:800}
+.brand p{margin:0;font-size:11.5px;color:var(--ink-3);letter-spacing:.14em;text-transform:uppercase;font-weight:600}
+.topbtns{display:flex;gap:8px}
+.icon-btn{width:40px;height:40px;border-radius:12px;background:var(--surface);border:1px solid var(--line);
+  display:grid;place-items:center;color:var(--ink-2);box-shadow:var(--shadow);transition:transform .12s,color .12s}
+.icon-btn:hover{transform:translateY(-1px);color:var(--ink)}
+.icon-btn svg{width:19px;height:19px}
+
+/* ---------- Date nav ---------- */
+.datenav{display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:18px}
+.datenav button{width:38px;height:38px;border-radius:12px;background:var(--surface);border:1px solid var(--line);
+  display:grid;place-items:center;color:var(--ink-2);box-shadow:var(--shadow)}
+.datenav button:hover{color:var(--ink)}
+.datenav svg{width:18px;height:18px}
+.date-display{min-width:220px;text-align:center}
+.date-display .d1{font-weight:800;font-size:17px;letter-spacing:-.01em}
+.date-display .d2{font-size:12px;color:var(--ink-3);font-weight:600}
+.today-pill{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--accent-deep);
+  background:var(--accent-soft);padding:2px 8px;border-radius:20px;margin-left:6px}
+
+/* ---------- Layout grid ---------- */
+.grid{display:grid;grid-template-columns:360px 1fr;gap:18px;align-items:start}
+@media (max-width:840px){.grid{grid-template-columns:1fr}}
+
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+
+/* ---------- Summary ---------- */
+.summary{padding:22px;position:sticky;top:16px}
+@media (max-width:840px){.summary{position:static}}
+.ring-wrap{display:flex;align-items:center;gap:20px}
+.ring{position:relative;width:150px;height:150px;flex:none}
+.ring svg{transform:rotate(-90deg)}
+.ring .center{position:absolute;inset:0;display:grid;place-content:center;text-align:center;gap:1px}
+.ring .center .big{font-size:34px;font-weight:800;letter-spacing:-.03em;line-height:1}
+.ring .center .lbl{font-size:11px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.1em;font-weight:700}
+.ring-stats{flex:1;display:flex;flex-direction:column;gap:12px;min-width:0}
+.rstat{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.rstat .k{font-size:12.5px;color:var(--ink-2);font-weight:600}
+.rstat .v{font-weight:800;font-size:16px;letter-spacing:-.01em}
+.rstat .v small{font-weight:600;color:var(--ink-3);font-size:11px;letter-spacing:0}
+.over{color:var(--danger)!important}
+
+.macros{margin-top:22px;display:flex;flex-direction:column;gap:15px}
+.macro .mhead{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px}
+.macro .mname{display:flex;align-items:center;gap:7px;font-size:13px;font-weight:700}
+.macro .dot{width:9px;height:9px;border-radius:3px;flex:none}
+.macro .mval{font-size:12.5px;color:var(--ink-2);font-weight:600}
+.macro .mval b{color:var(--ink);font-weight:800}
+.track{height:9px;border-radius:6px;background:var(--surface-2);overflow:hidden}
+.track .fill{height:100%;border-radius:6px;transition:width .5s cubic-bezier(.22,1,.36,1)}
+
+.goal-btn{margin-top:20px;width:100%;padding:11px;border-radius:12px;background:var(--surface-2);
+  border:1px solid var(--line);font-weight:700;font-size:13px;color:var(--ink-2);display:flex;align-items:center;
+  justify-content:center;gap:7px;transition:color .12s,background .12s}
+.goal-btn:hover{color:var(--ink);background:var(--line)}
+.goal-btn svg{width:16px;height:16px}
+
+/* ---------- Meals ---------- */
+.meals{display:flex;flex-direction:column;gap:14px}
+.meal{overflow:hidden}
+.meal-head{display:flex;align-items:center;gap:12px;padding:15px 16px}
+.meal-emoji{width:40px;height:40px;border-radius:12px;background:var(--surface-2);display:grid;place-items:center;
+  font-size:20px;flex:none}
+.meal-title{flex:1;min-width:0}
+.meal-title h3{margin:0;font-size:15.5px;font-weight:800;letter-spacing:-.01em}
+.meal-title .sub{font-size:12px;color:var(--ink-3);font-weight:600}
+.meal-kcal{font-weight:800;font-size:15px;letter-spacing:-.01em}
+.meal-kcal small{font-weight:600;color:var(--ink-3);font-size:11px}
+.meal-photo-btn{width:38px;height:38px;border-radius:11px;border:1px solid var(--line);background:var(--surface);
+  display:grid;place-items:center;color:var(--ink-3);flex:none;overflow:hidden;transition:color .12s}
+.meal-photo-btn:hover{color:var(--accent)}
+.meal-photo-btn svg{width:17px;height:17px}
+.meal-photo-btn img{width:100%;height:100%;object-fit:cover}
+
+.meal-body{border-top:1px solid var(--line)}
+.entry{display:flex;align-items:center;gap:12px;padding:11px 16px;border-bottom:1px solid var(--line)}
+.entry:last-child{border-bottom:none}
+.entry-thumb{width:38px;height:38px;border-radius:10px;background:var(--surface-2);flex:none;overflow:hidden;
+  display:grid;place-items:center;color:var(--ink-3);font-size:16px;font-weight:800}
+.entry-thumb img{width:100%;height:100%;object-fit:cover}
+.entry-main{flex:1;min-width:0}
+.entry-main .en{font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.entry-main .es{font-size:11.5px;color:var(--ink-3);font-weight:600}
+.entry-macros{display:flex;gap:9px;font-size:11px;font-weight:700;color:var(--ink-3)}
+.entry-macros span::before{content:"";display:inline-block;width:6px;height:6px;border-radius:2px;margin-right:3px;
+  vertical-align:middle}
+.entry-macros .p::before{background:var(--protein)}
+.entry-macros .c::before{background:var(--carbs)}
+.entry-macros .f::before{background:var(--fat)}
+.entry-kcal{font-weight:800;font-size:14px;min-width:52px;text-align:right}
+.entry-del{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;color:var(--ink-3);flex:none}
+.entry-del:hover{color:var(--danger);background:var(--surface-2)}
+.entry-del svg{width:16px;height:16px}
+@media (max-width:520px){.entry-macros{display:none}}
+
+.add-food{width:100%;padding:13px 16px;display:flex;align-items:center;gap:8px;font-weight:700;font-size:13.5px;
+  color:var(--accent-deep);border-top:1px solid var(--line);transition:background .12s}
+.add-food:hover{background:var(--accent-soft)}
+.add-food svg{width:17px;height:17px}
+.meal-empty{padding:14px 16px;font-size:13px;color:var(--ink-3);font-weight:500}
+
+/* ---------- Modal ---------- */
+.scrim{position:fixed;inset:0;background:rgba(15,20,13,.5);backdrop-filter:blur(3px);z-index:40;
+  display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s}
+.scrim.on{opacity:1;pointer-events:auto}
+@media (min-width:640px){.scrim{align-items:center;padding:24px}}
+.modal{background:var(--surface);width:100%;max-width:540px;max-height:88vh;border-radius:22px 22px 0 0;
+  box-shadow:var(--shadow-lg);display:flex;flex-direction:column;transform:translateY(24px);transition:transform .24s cubic-bezier(.22,1,.36,1);overflow:hidden}
+@media (min-width:640px){.modal{border-radius:22px}}
+.scrim.on .modal{transform:translateY(0)}
+.modal-head{display:flex;align-items:center;gap:12px;padding:18px 20px;border-bottom:1px solid var(--line)}
+.modal-head h2{margin:0;font-size:18px;font-weight:800;letter-spacing:-.02em;flex:1}
+.modal-close{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;color:var(--ink-2);
+  background:var(--surface-2)}
+.modal-close:hover{color:var(--ink)}
+.modal-close svg{width:18px;height:18px}
+.modal-body{overflow-y:auto;padding:16px 20px 22px}
+
+/* Search */
+.search{position:relative;margin-bottom:14px}
+.search svg{position:absolute;left:13px;top:50%;transform:translateY(-50%);width:18px;height:18px;color:var(--ink-3)}
+.search input{width:100%;padding:12px 14px 12px 40px;border-radius:12px;border:1px solid var(--line);
+  background:var(--surface-2);font-size:14.5px;font-weight:500}
+.search input:focus{outline:none;border-color:var(--accent);background:var(--surface)}
+
+.food-list{display:flex;flex-direction:column;gap:8px}
+.food-row{display:flex;align-items:center;gap:12px;padding:10px;border:1px solid var(--line);border-radius:14px;
+  background:var(--surface);transition:border-color .12s,transform .12s;text-align:left;width:100%}
+.food-row:hover{border-color:var(--accent);transform:translateX(2px)}
+.food-row .fr-thumb{width:42px;height:42px;border-radius:11px;background:var(--surface-2);overflow:hidden;flex:none;
+  display:grid;place-items:center;color:var(--ink-3);font-weight:800}
+.food-row .fr-thumb img{width:100%;height:100%;object-fit:cover}
+.food-row .fr-main{flex:1;min-width:0}
+.food-row .fr-name{font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.food-row .fr-sub{font-size:11.5px;color:var(--ink-3);font-weight:600}
+.food-row .fr-kcal{font-weight:800;font-size:14px}
+.food-row .fr-kcal small{font-weight:600;color:var(--ink-3);font-size:10.5px;display:block;text-align:right}
+.empty-state{text-align:center;padding:30px 16px;color:var(--ink-3)}
+.empty-state svg{width:34px;height:34px;margin-bottom:8px;opacity:.5}
+
+.new-food-cta{width:100%;margin-top:12px;padding:14px;border-radius:14px;border:1.5px dashed var(--line);
+  display:flex;align-items:center;justify-content:center;gap:8px;font-weight:700;font-size:14px;color:var(--accent-deep);
+  transition:border-color .12s,background .12s}
+.new-food-cta:hover{border-color:var(--accent);background:var(--accent-soft)}
+.new-food-cta svg{width:18px;height:18px}
+
+/* Forms */
+.field{margin-bottom:14px}
+.field label{display:block;font-size:12px;font-weight:700;color:var(--ink-2);text-transform:uppercase;
+  letter-spacing:.06em;margin-bottom:6px}
+.field input,.field select{width:100%;padding:11px 13px;border-radius:11px;border:1px solid var(--line);
+  background:var(--surface-2);font-size:14.5px;font-weight:500}
+.field input:focus,.field select:focus{outline:none;border-color:var(--accent);background:var(--surface)}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.field-row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.hint{font-size:11.5px;color:var(--ink-3);font-weight:500;margin-top:5px}
+
+.photo-drop{border:1.5px dashed var(--line);border-radius:14px;padding:18px;display:flex;flex-direction:column;
+  align-items:center;gap:8px;color:var(--ink-3);text-align:center;transition:border-color .12s;position:relative;overflow:hidden}
+.photo-drop:hover{border-color:var(--accent)}
+.photo-drop svg{width:26px;height:26px}
+.photo-drop .pd-t{font-size:13px;font-weight:700;color:var(--ink-2)}
+.photo-drop .pd-s{font-size:11.5px}
+.photo-drop img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.photo-drop .clear-photo{position:absolute;top:8px;right:8px;width:28px;height:28px;border-radius:8px;
+  background:rgba(0,0,0,.55);color:#fff;display:grid;place-items:center;z-index:2}
+.photo-drop .clear-photo svg{width:15px;height:15px}
+
+.calc-preview{background:var(--accent-soft);border-radius:12px;padding:12px 14px;display:flex;align-items:center;
+  justify-content:space-between;margin-top:2px;margin-bottom:14px}
+.calc-preview .cp-l{font-size:12px;font-weight:700;color:var(--accent-deep);text-transform:uppercase;letter-spacing:.05em}
+.calc-preview .cp-v{font-weight:800;font-size:20px;color:var(--accent-deep)}
+.calc-preview .cp-v small{font-size:12px;font-weight:600}
+
+.btn{width:100%;padding:14px;border-radius:13px;font-weight:800;font-size:15px;letter-spacing:-.01em;
+  background:var(--accent);color:#fff;box-shadow:var(--shadow);transition:transform .12s,background .12s}
+.btn:hover{background:var(--accent-deep);transform:translateY(-1px)}
+.btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.btn-ghost{background:var(--surface-2);color:var(--ink-2);box-shadow:none}
+.btn-ghost:hover{background:var(--line);color:var(--ink)}
+.btn-row{display:flex;gap:10px;margin-top:6px}
+
+/* servings stepper */
+.stepper{display:flex;align-items:center;gap:0;border:1px solid var(--line);border-radius:12px;overflow:hidden;
+  background:var(--surface-2)}
+.stepper button{width:46px;height:46px;font-size:22px;font-weight:700;color:var(--ink-2);display:grid;place-items:center}
+.stepper button:hover{color:var(--ink);background:var(--line)}
+.stepper input{flex:1;text-align:center;border:none;background:transparent;font-weight:800;font-size:18px;
+  -moz-appearance:textfield}
+.stepper input::-webkit-outer-spin-button,.stepper input::-webkit-inner-spin-button{-webkit-appearance:none}
+
+.seg{display:flex;gap:6px;background:var(--surface-2);padding:5px;border-radius:12px;margin-bottom:14px}
+.seg button{flex:1;padding:9px;border-radius:9px;font-weight:700;font-size:12.5px;color:var(--ink-3)}
+.seg button.on{background:var(--surface);color:var(--ink);box-shadow:var(--shadow)}
+
+/* toast */
+.toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,120%);background:var(--ink);color:var(--bg);
+  padding:12px 20px;border-radius:14px;font-weight:700;font-size:14px;z-index:60;box-shadow:var(--shadow-lg);
+  transition:transform .3s cubic-bezier(.22,1,.36,1);display:flex;align-items:center;gap:9px;max-width:90vw}
+.toast.on{transform:translate(-50%,0)}
+.toast svg{width:18px;height:18px;color:var(--accent-deep)}
+
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <div class="brand">
+      <div class="mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 3v7a3 3 0 0 0 3 3v8M7 3v6M10 3v6M20 3s-2 2-2 7 2 4 2 4v7"/>
+        </svg>
+      </div>
+      <div>
+        <h1>Plate</h1>
+        <p>Nutrition, tracked</p>
+      </div>
+    </div>
+    <div class="topbtns">
+      <button class="icon-btn" id="themeBtn" title="Toggle theme" aria-label="Toggle light or dark theme">
+        <svg id="themeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+      </button>
+      <button class="icon-btn" id="dbBtn" title="Food database" aria-label="Manage food database">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v6c0 1.7 3.6 3 8 3s8-1.3 8-3V5M4 11v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <nav class="datenav" aria-label="Choose day">
+    <button id="prevDay" aria-label="Previous day"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
+    <div class="date-display">
+      <div class="d1" id="dateMain">—</div>
+      <div class="d2" id="dateSub">—</div>
+    </div>
+    <button id="nextDay" aria-label="Next day"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg></button>
+  </nav>
+
+  <div class="grid">
+    <!-- Summary -->
+    <aside class="card summary">
+      <div class="ring-wrap">
+        <div class="ring">
+          <svg width="150" height="150" viewBox="0 0 150 150">
+            <circle cx="75" cy="75" r="64" fill="none" stroke="var(--surface-2)" stroke-width="14"/>
+            <circle id="ringFill" cx="75" cy="75" r="64" fill="none" stroke="var(--accent)" stroke-width="14"
+              stroke-linecap="round" stroke-dasharray="402" stroke-dashoffset="402"/>
+          </svg>
+          <div class="center">
+            <div class="big tnum" id="ringRemain">0</div>
+            <div class="lbl" id="ringLbl">kcal left</div>
+          </div>
+        </div>
+        <div class="ring-stats">
+          <div class="rstat"><span class="k">Goal</span><span class="v tnum" id="statGoal">0 <small>kcal</small></span></div>
+          <div class="rstat"><span class="k">Food</span><span class="v tnum" id="statFood">0 <small>kcal</small></span></div>
+          <div class="rstat"><span class="k">Remaining</span><span class="v tnum" id="statRemain">0 <small>kcal</small></span></div>
+        </div>
+      </div>
+
+      <div class="macros">
+        <div class="macro">
+          <div class="mhead">
+            <span class="mname"><span class="dot" style="background:var(--protein)"></span>Protein</span>
+            <span class="mval"><b class="tnum" id="pNow">0</b> / <span class="tnum" id="pGoal">0</span> g</span>
+          </div>
+          <div class="track"><div class="fill" id="pFill" style="width:0;background:var(--protein)"></div></div>
+        </div>
+        <div class="macro">
+          <div class="mhead">
+            <span class="mname"><span class="dot" style="background:var(--carbs)"></span>Carbs</span>
+            <span class="mval"><b class="tnum" id="cNow">0</b> / <span class="tnum" id="cGoal">0</span> g</span>
+          </div>
+          <div class="track"><div class="fill" id="cFill" style="width:0;background:var(--carbs)"></div></div>
+        </div>
+        <div class="macro">
+          <div class="mhead">
+            <span class="mname"><span class="dot" style="background:var(--fat)"></span>Fat</span>
+            <span class="mval"><b class="tnum" id="fNow">0</b> / <span class="tnum" id="fGoal">0</span> g</span>
+          </div>
+          <div class="track"><div class="fill" id="fFill" style="width:0;background:var(--fat)"></div></div>
+        </div>
+      </div>
+
+      <button class="goal-btn" id="goalBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v6m0 6v10M4.2 4.2l4.3 4.3m7 7l4.3 4.3M1 12h6m6 0h10"/></svg>
+        Edit daily goals
+      </button>
+    </aside>
+
+    <!-- Meals -->
+    <section class="meals" id="meals" aria-label="Meals"></section>
+  </div>
+</div>
+
+<!-- ============ Picker / New food modal ============ -->
+<div class="scrim" id="pickerScrim" role="dialog" aria-modal="true" aria-labelledby="pickerTitle">
+  <div class="modal">
+    <div class="modal-head">
+      <h2 id="pickerTitle">Add food</h2>
+      <button class="modal-close" data-close="pickerScrim" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+    </div>
+    <div class="modal-body" id="pickerBody"></div>
+  </div>
+</div>
+
+<!-- ============ Goals modal ============ -->
+<div class="scrim" id="goalScrim" role="dialog" aria-modal="true" aria-labelledby="goalTitle">
+  <div class="modal">
+    <div class="modal-head">
+      <h2 id="goalTitle">Daily goals</h2>
+      <button class="modal-close" data-close="goalScrim" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+    </div>
+    <div class="modal-body">
+      <div class="field">
+        <label for="gCal">Calorie target</label>
+        <input type="number" id="gCal" inputmode="numeric" min="0" step="10">
+        <div class="hint">Macros below should roughly add up to your calorie target (4 kcal/g protein & carbs, 9 kcal/g fat).</div>
+      </div>
+      <div class="field-row-3">
+        <div class="field"><label for="gPro">Protein (g)</label><input type="number" id="gPro" inputmode="numeric" min="0"></div>
+        <div class="field"><label for="gCarb">Carbs (g)</label><input type="number" id="gCarb" inputmode="numeric" min="0"></div>
+        <div class="field"><label for="gFat">Fat (g)</label><input type="number" id="gFat" inputmode="numeric" min="0"></div>
+      </div>
+      <div class="calc-preview"><span class="cp-l">From macros</span><span class="cp-v tnum" id="gMacroKcal">0 <small>kcal</small></span></div>
+      <button class="btn" id="saveGoals">Save goals</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ Database modal ============ -->
+<div class="scrim" id="dbScrim" role="dialog" aria-modal="true" aria-labelledby="dbTitle">
+  <div class="modal">
+    <div class="modal-head">
+      <h2 id="dbTitle">Food database</h2>
+      <button class="modal-close" data-close="dbScrim" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+    </div>
+    <div class="modal-body" id="dbBody"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+"use strict";
+/* =========================================================================
+   Plate — a local-first calorie & macro tracker.
+   All data lives in localStorage. Images are downscaled before storage.
+   ========================================================================= */
+
+const MEALS = [
+  {id:"breakfast", name:"Breakfast", emoji:"🍳"},
+  {id:"lunch",     name:"Lunch",     emoji:"🥗"},
+  {id:"dinner",    name:"Dinner",    emoji:"🍲"},
+  {id:"snacks",    name:"Snacks",    emoji:"🍎"},
+];
+
+const SEED_FOODS = [
+  {name:"Oatmeal, cooked", brand:"", serving:1, unit:"cup", kcal:158, p:6, c:27, f:3},
+  {name:"Banana", brand:"", serving:1, unit:"medium", kcal:105, p:1.3, c:27, f:0.4},
+  {name:"Greek yogurt, plain", brand:"", serving:170, unit:"g", kcal:100, p:17, c:6, f:0.7},
+  {name:"Blueberries", brand:"", serving:1, unit:"cup", kcal:84, p:1.1, c:21, f:0.5},
+  {name:"Eggs, large", brand:"", serving:2, unit:"eggs", kcal:143, p:12.6, c:0.7, f:9.5},
+  {name:"Whole wheat bread", brand:"", serving:1, unit:"slice", kcal:82, p:4, c:14, f:1.1},
+  {name:"Chicken breast, grilled", brand:"", serving:120, unit:"g", kcal:198, p:37, c:0, f:4.3},
+  {name:"White rice, cooked", brand:"", serving:1, unit:"cup", kcal:205, p:4.3, c:45, f:0.4},
+  {name:"Brown rice, cooked", brand:"", serving:1, unit:"cup", kcal:216, p:5, c:45, f:1.8},
+  {name:"Avocado", brand:"", serving:0.5, unit:"fruit", kcal:161, p:2, c:8.5, f:14.7},
+  {name:"Almonds", brand:"", serving:28, unit:"g", kcal:164, p:6, c:6, f:14},
+  {name:"Salmon, baked", brand:"", serving:120, unit:"g", kcal:250, p:25, c:0, f:16},
+  {name:"Broccoli, steamed", brand:"", serving:1, unit:"cup", kcal:55, p:3.7, c:11, f:0.6},
+  {name:"Olive oil", brand:"", serving:1, unit:"tbsp", kcal:119, p:0, c:0, f:13.5},
+  {name:"Peanut butter", brand:"", serving:2, unit:"tbsp", kcal:188, p:8, c:6, f:16},
+  {name:"Apple", brand:"", serving:1, unit:"medium", kcal:95, p:0.5, c:25, f:0.3},
+  {name:"Coffee, black", brand:"", serving:1, unit:"cup", kcal:2, p:0.3, c:0, f:0},
+  {name:"Sweet potato, baked", brand:"", serving:1, unit:"medium", kcal:112, p:2, c:26, f:0.1},
+];
+
+const store = {
+  read(){
+    try{ return JSON.parse(localStorage.getItem("plate.v1")) || null; }catch(e){ return null; }
+  },
+  write(s){
+    try{ localStorage.setItem("plate.v1", JSON.stringify(s)); }
+    catch(e){ toast("Storage full — try smaller photos", true); }
+  }
+};
+
+function seedState(){
+  return {
+    goals:{kcal:2200, p:150, c:220, f:70},
+    foods: SEED_FOODS.map((f,i)=>({id:"seed"+i, photo:"", ...f})),
+    log:{},        // { 'YYYY-MM-DD': [ {id, foodId, meal, servings} ] }
+    mealPhotos:{}, // { 'YYYY-MM-DD': { breakfast:dataURL, ... } }
+    theme:null
+  };
+}
+
+let state = store.read() || seedState();
+// migrate missing keys
+state.mealPhotos = state.mealPhotos || {};
+state.goals = state.goals || {kcal:2200,p:150,c:220,f:70};
+
+let current = todayKey();
+let editingFoodId = null; // when adding food, which meal
+let pendingPhoto = "";    // holds a data URL while a form is open
+
+/* ---------- helpers ---------- */
+function todayKey(d=new Date()){
+  const x=new Date(d); x.setHours(0,0,0,0);
+  return x.getFullYear()+"-"+String(x.getMonth()+1).padStart(2,"0")+"-"+String(x.getDate()).padStart(2,"0");
+}
+function keyToDate(k){ const [y,m,d]=k.split("-").map(Number); return new Date(y,m-1,d); }
+function shiftDay(k,delta){ const d=keyToDate(k); d.setDate(d.getDate()+delta); return todayKey(d); }
+function r0(n){ return Math.round(n); }
+function r1(n){ return Math.round(n*10)/10; }
+function foodById(id){ return state.foods.find(f=>f.id===id); }
+function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
+function save(){ store.write(state); }
+function esc(s){ return String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m])); }
+
+function dayEntries(){ return state.log[current] || []; }
+function entryTotals(e){
+  const food=foodById(e.foodId); if(!food) return {kcal:0,p:0,c:0,f:0};
+  const m=e.servings;
+  return {kcal:food.kcal*m, p:food.p*m, c:food.c*m, f:food.f*m};
+}
+function dayTotals(){
+  return dayEntries().reduce((a,e)=>{const t=entryTotals(e);a.kcal+=t.kcal;a.p+=t.p;a.c+=t.c;a.f+=t.f;return a;},{kcal:0,p:0,c:0,f:0});
+}
+
+/* ---------- image downscaling ---------- */
+function processImage(file, cb){
+  const reader=new FileReader();
+  reader.onload=()=>{
+    const img=new Image();
+    img.onload=()=>{
+      const MAX=420;
+      let {width:w,height:h}=img;
+      if(w>h && w>MAX){ h=h*MAX/w; w=MAX; } else if(h>MAX){ w=w*MAX/h; h=MAX; }
+      const cv=document.createElement("canvas"); cv.width=w; cv.height=h;
+      cv.getContext("2d").drawImage(img,0,0,w,h);
+      cb(cv.toDataURL("image/jpeg",0.72));
+    };
+    img.onerror=()=>toast("Couldn't read that image",true);
+    img.src=reader.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+/* ===================== RENDER ===================== */
+function render(){
+  renderDate();
+  renderSummary();
+  renderMeals();
+}
+
+function renderDate(){
+  const d=keyToDate(current);
+  const wd=d.toLocaleDateString(undefined,{weekday:"long"});
+  const md=d.toLocaleDateString(undefined,{month:"long",day:"numeric"});
+  const isToday = current===todayKey();
+  $("#dateMain").innerHTML = esc(wd) + (isToday?' <span class="today-pill">Today</span>':'');
+  $("#dateSub").textContent = md + ", " + d.getFullYear();
+}
+
+function renderSummary(){
+  const g=state.goals, t=dayTotals();
+  const food=r0(t.kcal), remain=g.kcal-food;
+  // ring
+  const C=2*Math.PI*64;
+  const pct=Math.max(0,Math.min(1, g.kcal>0? food/g.kcal : 0));
+  const fill=$("#ringFill");
+  fill.setAttribute("stroke-dasharray", C.toFixed(1));
+  fill.setAttribute("stroke-dashoffset", (C*(1-pct)).toFixed(1));
+  fill.setAttribute("stroke", remain<0? "var(--danger)":"var(--accent)");
+  $("#ringRemain").textContent = Math.abs(remain).toLocaleString();
+  $("#ringLbl").textContent = remain<0? "kcal over" : "kcal left";
+  $("#statGoal").innerHTML = g.kcal.toLocaleString()+' <small>kcal</small>';
+  $("#statFood").innerHTML = food.toLocaleString()+' <small>kcal</small>';
+  const sr=$("#statRemain"); sr.innerHTML = remain.toLocaleString()+' <small>kcal</small>';
+  sr.classList.toggle("over", remain<0);
+  // macros
+  macroBar("p", t.p, g.p); macroBar("c", t.c, g.c); macroBar("f", t.f, g.f);
+}
+function macroBar(k, now, goal){
+  $("#"+k+"Now").textContent = r0(now);
+  $("#"+k+"Goal").textContent = r0(goal);
+  const pct = goal>0? Math.min(100, now/goal*100) : 0;
+  $("#"+k+"Fill").style.width = pct+"%";
+}
+
+function renderMeals(){
+  const wrap=$("#meals"); wrap.innerHTML="";
+  const photos = state.mealPhotos[current]||{};
+  MEALS.forEach(meal=>{
+    const entries = dayEntries().filter(e=>e.meal===meal.id);
+    const kcal = r0(entries.reduce((s,e)=>s+entryTotals(e).kcal,0));
+    const card=document.createElement("section");
+    card.className="card meal";
+    const photo = photos[meal.id];
+    let html = `<div class="meal-head">
+        <div class="meal-emoji" aria-hidden="true">${meal.emoji}</div>
+        <div class="meal-title"><h3>${meal.name}</h3><div class="sub">${entries.length} ${entries.length===1?"item":"items"}</div></div>
+        <div class="meal-kcal tnum">${kcal.toLocaleString()} <small>kcal</small></div>
+        <button class="meal-photo-btn" data-mealphoto="${meal.id}" title="Meal photo" aria-label="Add photo to ${meal.name}">
+          ${photo? `<img src="${photo}" alt="">` : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>`}
+        </button>
+      </div>`;
+    if(entries.length){
+      html += `<div class="meal-body">`;
+      entries.forEach(e=>{
+        const food=foodById(e.foodId); if(!food) return;
+        const t=entryTotals(e);
+        const label = servingLabel(food, e.servings);
+        html += `<div class="entry">
+          <div class="entry-thumb">${food.photo?`<img src="${food.photo}" alt="">`:esc(food.name[0]||"·").toUpperCase()}</div>
+          <div class="entry-main">
+            <div class="en">${esc(food.name)}</div>
+            <div class="es">${esc(label)}</div>
+          </div>
+          <div class="entry-macros">
+            <span class="p">${r0(t.p)}g</span><span class="c">${r0(t.c)}g</span><span class="f">${r0(t.f)}g</span>
+          </div>
+          <div class="entry-kcal tnum">${r0(t.kcal)}</div>
+          <button class="entry-del" data-del="${e.id}" aria-label="Remove ${esc(food.name)}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m2 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg></button>
+        </div>`;
+      });
+      html += `</div>`;
+    } else {
+      html += `<div class="meal-empty">Nothing logged yet.</div>`;
+    }
+    html += `<button class="add-food" data-addfood="${meal.id}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+        Add food to ${meal.name.toLowerCase()}</button>`;
+    card.innerHTML=html;
+    wrap.appendChild(card);
+  });
+}
+function servingLabel(food, mult){
+  const qty = r1(food.serving*mult);
+  const unit = food.unit || "serving";
+  const brand = food.brand? esc(food.brand)+" · " : "";
+  return `${brand}${qty} ${unit}`;
+}
+
+/* ===================== FOOD PICKER ===================== */
+function openPicker(mealId){
+  editingFoodId=mealId;
+  $("#pickerTitle").textContent = "Add to "+ MEALS.find(m=>m.id===mealId).name;
+  renderPickerList("");
+  openModal("pickerScrim");
+  setTimeout(()=>{ const s=$("#pickerSearch"); if(s) s.focus(); },260);
+}
+function renderPickerList(q){
+  const body=$("#pickerBody");
+  const list = filterFoods(q);
+  body.innerHTML = `
+    <div class="search">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>
+      <input id="pickerSearch" type="text" placeholder="Search foods…" autocomplete="off" value="${esc(q)}">
+    </div>
+    <div class="food-list" id="pickerList">
+      ${list.length? list.map(foodRowHTML).join("") : emptyFoodsHTML(q)}
+    </div>
+    <button class="new-food-cta" id="newFoodBtn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+      Create${q?` "${esc(q)}"`:" a new food"}
+    </button>`;
+  const s=$("#pickerSearch");
+  s.addEventListener("input", ()=>{
+    const list=filterFoods(s.value);
+    $("#pickerList").innerHTML = list.length? list.map(foodRowHTML).join("") : emptyFoodsHTML(s.value);
+    $("#newFoodBtn").innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg> Create${s.value?` "${esc(s.value)}"`:" a new food"}`;
+  });
+  $("#newFoodBtn").addEventListener("click", ()=> openNewFoodForm($("#pickerSearch").value));
+}
+function filterFoods(q){
+  q=(q||"").trim().toLowerCase();
+  let list = state.foods.slice();
+  if(q) list = list.filter(f=>(f.name+" "+f.brand).toLowerCase().includes(q));
+  return list.sort((a,b)=>a.name.localeCompare(b.name));
+}
+function foodRowHTML(f){
+  return `<button class="food-row" data-food="${f.id}">
+    <div class="fr-thumb">${f.photo?`<img src="${f.photo}" alt="">`:esc((f.name[0]||"·").toUpperCase())}</div>
+    <div class="fr-main">
+      <div class="fr-name">${esc(f.name)}</div>
+      <div class="fr-sub">${f.brand?esc(f.brand)+" · ":""}${r1(f.serving)} ${esc(f.unit)}</div>
+    </div>
+    <div class="fr-kcal tnum">${r0(f.kcal)}<small>kcal</small></div>
+  </button>`;
+}
+function emptyFoodsHTML(q){
+  return `<div class="empty-state">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>
+    <div style="font-weight:700;color:var(--ink-2)">No matches${q?` for "${esc(q)}"`:""}</div>
+    <div style="font-size:13px;margin-top:2px">Create it below — it takes a few seconds.</div>
+  </div>`;
+}
+
+/* ---- quantity / add step ---- */
+function openQuantity(foodId){
+  const food=foodById(foodId); if(!food) return;
+  const body=$("#pickerBody");
+  $("#pickerTitle").textContent = food.name;
+  let mult=1;
+  const draw=()=>{
+    const t={kcal:food.kcal*mult,p:food.p*mult,c:food.c*mult,f:food.f*mult};
+    body.innerHTML = `
+      <div style="display:flex;gap:14px;align-items:center;margin-bottom:18px">
+        <div class="fr-thumb" style="width:60px;height:60px;border-radius:16px;font-size:24px">${food.photo?`<img src="${food.photo}" alt="">`:esc((food.name[0]||"·").toUpperCase())}</div>
+        <div style="min-width:0">
+          <div style="font-weight:800;font-size:17px;letter-spacing:-.01em">${esc(food.name)}</div>
+          <div style="font-size:13px;color:var(--ink-3);font-weight:600">${food.brand?esc(food.brand)+" · ":""}per ${r1(food.serving)} ${esc(food.unit)}: ${r0(food.kcal)} kcal</div>
+        </div>
+      </div>
+      <div class="field"><label>Number of servings</label>
+        <div class="stepper">
+          <button id="qMinus" aria-label="Fewer">–</button>
+          <input id="qInput" type="number" min="0" step="0.5" value="${mult}" inputmode="decimal">
+          <button id="qPlus" aria-label="More">+</button>
+        </div>
+        <div class="hint" id="qEquals">= ${r1(food.serving*mult)} ${esc(food.unit)}</div>
+      </div>
+      <div class="field-row-3" style="margin-bottom:16px">
+        ${miniStat("Protein","var(--protein)",r0(t.p)+"g")}
+        ${miniStat("Carbs","var(--carbs)",r0(t.c)+"g")}
+        ${miniStat("Fat","var(--fat)",r0(t.f)+"g")}
+      </div>
+      <div class="calc-preview"><span class="cp-l">Total</span><span class="cp-v tnum">${r0(t.kcal)} <small>kcal</small></span></div>
+      <div class="btn-row">
+        <button class="btn btn-ghost" id="qBack" style="flex:0 0 40%">Back</button>
+        <button class="btn" id="qAdd">Add to ${MEALS.find(m=>m.id===editingFoodId).name.toLowerCase()}</button>
+      </div>`;
+    const inp=$("#qInput");
+    $("#qMinus").onclick=()=>{ mult=Math.max(0.5, Math.round((mult-0.5)*2)/2); draw(); };
+    $("#qPlus").onclick =()=>{ mult=Math.round((mult+0.5)*2)/2; draw(); };
+    inp.oninput=()=>{ mult=Math.max(0, parseFloat(inp.value)||0); $("#qEquals").textContent="= "+r1(food.serving*mult)+" "+food.unit; };
+    inp.onchange=()=>{ if(!mult) mult=1; draw(); };
+    $("#qBack").onclick=()=> renderPickerList("");
+    $("#qAdd").onclick =()=>{
+      if(!mult){ toast("Enter a serving amount",true); return; }
+      dayEntries(); // ensure
+      if(!state.log[current]) state.log[current]=[];
+      state.log[current].push({id:uid(), foodId:food.id, meal:editingFoodId, servings:mult});
+      save(); render(); closeModal("pickerScrim");
+      toast(food.name+" added");
+    };
+  };
+  draw();
+}
+function miniStat(label,color,val){
+  return `<div style="background:var(--surface-2);border-radius:12px;padding:10px;text-align:center">
+    <div style="font-size:11px;font-weight:700;color:var(--ink-3);text-transform:uppercase;letter-spacing:.05em;display:flex;align-items:center;justify-content:center;gap:5px"><span style="width:8px;height:8px;border-radius:2px;background:${color}"></span>${label}</div>
+    <div style="font-weight:800;font-size:16px;margin-top:3px" class="tnum">${val}</div>
+  </div>`;
+}
+
+/* ---- new food form ---- */
+function openNewFoodForm(prefillName, existing){
+  pendingPhoto = existing? (existing.photo||"") : "";
+  const f = existing || {name:prefillName||"", brand:"", serving:1, unit:"serving", kcal:"", p:"", c:"", f:""};
+  $("#pickerTitle").textContent = existing? "Edit food" : "New food";
+  const body=$("#pickerBody");
+  body.innerHTML = `
+    <div class="field-row">
+      <div class="field" style="grid-column:span 2"><label for="nfName">Food name</label>
+        <input id="nfName" type="text" placeholder="e.g. Greek yogurt" value="${esc(f.name)}"></div>
+    </div>
+    <div class="field"><label for="nfBrand">Brand <span style="text-transform:none;color:var(--ink-3);font-weight:500">(optional)</span></label>
+      <input id="nfBrand" type="text" placeholder="e.g. Fage" value="${esc(f.brand)}"></div>
+    <div class="field-row">
+      <div class="field"><label for="nfServing">Serving size</label>
+        <input id="nfServing" type="number" min="0" step="any" inputmode="decimal" value="${f.serving}"></div>
+      <div class="field"><label for="nfUnit">Unit</label>
+        <input id="nfUnit" type="text" placeholder="g, cup, slice…" value="${esc(f.unit)}"></div>
+    </div>
+    <div class="field"><label>Nutrition per serving</label>
+      <div class="field-row" style="margin-bottom:10px">
+        <div><input id="nfKcal" type="number" min="0" step="any" inputmode="decimal" placeholder="Calories (kcal)" value="${f.kcal}"></div>
+        <div><input id="nfP" type="number" min="0" step="any" inputmode="decimal" placeholder="Protein (g)" value="${f.p}"></div>
+      </div>
+      <div class="field-row">
+        <div><input id="nfC" type="number" min="0" step="any" inputmode="decimal" placeholder="Carbs (g)" value="${f.c}"></div>
+        <div><input id="nfF" type="number" min="0" step="any" inputmode="decimal" placeholder="Fat (g)" value="${f.f}"></div>
+      </div>
+    </div>
+    <div class="calc-preview">
+      <span class="cp-l">Calc. from macros</span>
+      <span class="cp-v tnum" id="nfMacroKcal">0 <small>kcal</small></span>
+    </div>
+    <div class="field">
+      <label>Photo <span style="text-transform:none;color:var(--ink-3);font-weight:500">(optional)</span></label>
+      <label class="photo-drop" id="nfDrop">
+        ${pendingPhoto?`<img src="${pendingPhoto}" alt="Food photo">`:``}
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="${pendingPhoto?'opacity:0':''}"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+        <div class="pd-t" style="${pendingPhoto?'opacity:0':''}">Add a photo</div>
+        <div class="pd-s" style="${pendingPhoto?'opacity:0':''}">Snap it or choose from your library</div>
+        <input type="file" accept="image/*" capture="environment" class="sr" id="nfPhoto">
+      </label>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-ghost" id="nfBack" style="flex:0 0 34%">Back</button>
+      <button class="btn" id="nfSave">${existing?"Save changes":"Save food"}</button>
+    </div>`;
+
+  const recalc=()=>{
+    const p=+$("#nfP").value||0, c=+$("#nfC").value||0, ft=+$("#nfF").value||0;
+    $("#nfMacroKcal").innerHTML = r0(p*4+c*4+ft*9).toLocaleString()+' <small>kcal</small>';
+  };
+  ["nfP","nfC","nfF"].forEach(id=>$("#"+id).addEventListener("input",recalc));
+  recalc();
+
+  $("#nfPhoto").addEventListener("change", ev=>{
+    const file=ev.target.files[0]; if(!file) return;
+    processImage(file, url=>{
+      pendingPhoto=url;
+      const drop=$("#nfDrop");
+      [...drop.children].forEach(ch=>{ if(ch.tagName!=="INPUT") ch.remove(); });
+      const img=document.createElement("img"); img.src=url; img.alt="Food photo"; drop.prepend(img);
+      let btn=drop.querySelector(".clear-photo");
+      if(!btn){
+        btn=document.createElement("button"); btn.type="button"; btn.className="clear-photo";
+        btn.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>';
+        btn.onclick=(e)=>{ e.preventDefault(); e.stopPropagation(); pendingPhoto=""; openNewFoodForm(null, collectForm()); };
+        drop.appendChild(btn);
+      }
+    });
+  });
+
+  function collectForm(){
+    return {
+      id: existing?existing.id:undefined,
+      name:$("#nfName").value.trim(), brand:$("#nfBrand").value.trim(),
+      serving:+$("#nfServing").value||1, unit:$("#nfUnit").value.trim()||"serving",
+      kcal:+$("#nfKcal").value||0, p:+$("#nfP").value||0, c:+$("#nfC").value||0, f:+$("#nfF").value||0,
+      photo:pendingPhoto
+    };
+  }
+
+  $("#nfBack").onclick=()=> existing? openModal("dbScrim")||renderDB() : renderPickerList($("#nfName").value);
+  $("#nfSave").onclick=()=>{
+    const data=collectForm();
+    if(!data.name){ toast("Give the food a name",true); return; }
+    if(!data.kcal){ toast("Add the calories",true); return; }
+    if(existing){
+      const idx=state.foods.findIndex(x=>x.id===existing.id);
+      state.foods[idx]={...existing,...data};
+      save(); toast("Food updated"); render();
+      if(isOpen("dbScrim")) renderDB(); else renderPickerList("");
+    } else {
+      const nf={id:uid(),...data};
+      state.foods.push(nf);
+      save(); toast('"'+nf.name+'" saved');
+      if(editingFoodId){ openQuantity(nf.id); } else { render(); if(isOpen("dbScrim")) renderDB(); }
+    }
+  };
+}
+
+/* ===================== DATABASE MANAGER ===================== */
+function renderDB(){
+  const body=$("#dbBody");
+  const foods=state.foods.slice().sort((a,b)=>a.name.localeCompare(b.name));
+  body.innerHTML=`
+    <div class="search">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>
+      <input id="dbSearch" type="text" placeholder="Search your ${foods.length} foods…" autocomplete="off">
+    </div>
+    <button class="new-food-cta" id="dbNew" style="margin-top:0;margin-bottom:12px">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg> Add a new food
+    </button>
+    <div class="food-list" id="dbList">${foods.map(dbRowHTML).join("")}</div>`;
+  const search=$("#dbSearch");
+  search.addEventListener("input",()=>{
+    const q=search.value.trim().toLowerCase();
+    const f=foods.filter(x=>(x.name+" "+x.brand).toLowerCase().includes(q));
+    $("#dbList").innerHTML = f.length? f.map(dbRowHTML).join("") : emptyFoodsHTML(search.value);
+  });
+  $("#dbNew").onclick=()=>{ editingFoodId=null; openNewFoodFormInDB(); };
+}
+function dbRowHTML(f){
+  return `<div class="food-row" style="cursor:default">
+    <div class="fr-thumb">${f.photo?`<img src="${f.photo}" alt="">`:esc((f.name[0]||"·").toUpperCase())}</div>
+    <div class="fr-main">
+      <div class="fr-name">${esc(f.name)}</div>
+      <div class="fr-sub">${f.brand?esc(f.brand)+" · ":""}${r1(f.serving)} ${esc(f.unit)} · ${r0(f.kcal)} kcal</div>
+    </div>
+    <button class="entry-del" data-dbedit="${f.id}" aria-label="Edit ${esc(f.name)}" style="color:var(--ink-2)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg></button>
+    <button class="entry-del" data-dbdel="${f.id}" aria-label="Delete ${esc(f.name)}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m2 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg></button>
+  </div>`;
+}
+// New food while in DB modal: reuse the picker body area inside DB modal.
+function openNewFoodFormInDB(existing){
+  // Temporarily render the form into the DB body
+  const body=$("#dbBody");
+  pendingPhoto = existing? (existing.photo||"") : "";
+  const f = existing || {name:"",brand:"",serving:1,unit:"serving",kcal:"",p:"",c:"",f:""};
+  body.innerHTML = document.getElementById("__formTemplate")?"":"";
+  // Reuse openNewFoodForm markup by calling a shared builder:
+  buildFoodForm(body, f, existing, ()=>renderDB());
+}
+
+/* Shared food-form builder used by DB modal (keeps picker version intact) */
+function buildFoodForm(body, f, existing, onDone){
+  body.innerHTML = `
+    <div class="field"><label for="dfName">Food name</label>
+      <input id="dfName" type="text" placeholder="e.g. Greek yogurt" value="${esc(f.name)}"></div>
+    <div class="field"><label for="dfBrand">Brand <span style="text-transform:none;color:var(--ink-3);font-weight:500">(optional)</span></label>
+      <input id="dfBrand" type="text" value="${esc(f.brand)}"></div>
+    <div class="field-row">
+      <div class="field"><label for="dfServing">Serving size</label>
+        <input id="dfServing" type="number" min="0" step="any" inputmode="decimal" value="${f.serving}"></div>
+      <div class="field"><label for="dfUnit">Unit</label>
+        <input id="dfUnit" type="text" placeholder="g, cup…" value="${esc(f.unit)}"></div>
+    </div>
+    <div class="field"><label>Nutrition per serving</label>
+      <div class="field-row" style="margin-bottom:10px">
+        <input id="dfKcal" type="number" min="0" step="any" placeholder="Calories (kcal)" value="${f.kcal}">
+        <input id="dfP" type="number" min="0" step="any" placeholder="Protein (g)" value="${f.p}">
+      </div>
+      <div class="field-row">
+        <input id="dfC" type="number" min="0" step="any" placeholder="Carbs (g)" value="${f.c}">
+        <input id="dfF" type="number" min="0" step="any" placeholder="Fat (g)" value="${f.f}">
+      </div>
+    </div>
+    <div class="calc-preview"><span class="cp-l">Calc. from macros</span><span class="cp-v tnum" id="dfMacroKcal">0 <small>kcal</small></span></div>
+    <div class="field"><label>Photo <span style="text-transform:none;color:var(--ink-3);font-weight:500">(optional)</span></label>
+      <label class="photo-drop" id="dfDrop">
+        ${pendingPhoto?`<img src="${pendingPhoto}" alt="Food photo">`:``}
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="${pendingPhoto?'opacity:0':''}"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+        <div class="pd-t" style="${pendingPhoto?'opacity:0':''}">Add a photo</div>
+        <div class="pd-s" style="${pendingPhoto?'opacity:0':''}">Snap it or choose from your library</div>
+        <input type="file" accept="image/*" capture="environment" class="sr" id="dfPhoto">
+      </label></div>
+    <div class="btn-row">
+      <button class="btn btn-ghost" id="dfBack" style="flex:0 0 34%">Back</button>
+      <button class="btn" id="dfSave">${existing?"Save changes":"Save food"}</button>
+    </div>`;
+  const recalc=()=>{
+    const p=+$("#dfP").value||0,c=+$("#dfC").value||0,ft=+$("#dfF").value||0;
+    $("#dfMacroKcal").innerHTML=r0(p*4+c*4+ft*9).toLocaleString()+' <small>kcal</small>';
+  };
+  ["dfP","dfC","dfF"].forEach(id=>$("#"+id).addEventListener("input",recalc)); recalc();
+  $("#dfPhoto").addEventListener("change",ev=>{
+    const file=ev.target.files[0]; if(!file) return;
+    processImage(file,url=>{ pendingPhoto=url; buildFoodForm(body, collect(), existing, onDone); });
+  });
+  function collect(){
+    return {name:$("#dfName").value,brand:$("#dfBrand").value,serving:$("#dfServing").value,
+      unit:$("#dfUnit").value,kcal:$("#dfKcal").value,p:$("#dfP").value,c:$("#dfC").value,f:$("#dfF").value};
+  }
+  $("#dfBack").onclick=onDone;
+  $("#dfSave").onclick=()=>{
+    const data={
+      name:$("#dfName").value.trim(), brand:$("#dfBrand").value.trim(),
+      serving:+$("#dfServing").value||1, unit:$("#dfUnit").value.trim()||"serving",
+      kcal:+$("#dfKcal").value||0,p:+$("#dfP").value||0,c:+$("#dfC").value||0,f:+$("#dfF").value||0,
+      photo:pendingPhoto
+    };
+    if(!data.name){ toast("Give the food a name",true); return; }
+    if(!data.kcal){ toast("Add the calories",true); return; }
+    if(existing){ const i=state.foods.findIndex(x=>x.id===existing.id); state.foods[i]={...existing,...data}; toast("Food updated"); }
+    else { state.foods.push({id:uid(),...data}); toast('"'+data.name+'" saved'); }
+    save(); render(); onDone();
+  };
+}
+
+/* ===================== GOALS ===================== */
+function openGoals(){
+  const g=state.goals;
+  $("#gCal").value=g.kcal; $("#gPro").value=g.p; $("#gCarb").value=g.c; $("#gFat").value=g.f;
+  updateGoalPreview();
+  openModal("goalScrim");
+}
+function updateGoalPreview(){
+  const p=+$("#gPro").value||0,c=+$("#gCarb").value||0,f=+$("#gFat").value||0;
+  $("#gMacroKcal").innerHTML=r0(p*4+c*4+f*9).toLocaleString()+' <small>kcal</small>';
+}
+
+/* ===================== MODAL PLUMBING ===================== */
+function $(s){ return document.querySelector(s); }
+function openModal(id){ $("#"+id).classList.add("on"); document.body.style.overflow="hidden"; }
+function closeModal(id){ $("#"+id).classList.remove("on"); document.body.style.overflow=""; }
+function isOpen(id){ return $("#"+id).classList.contains("on"); }
+
+let toastTimer=null;
+function toast(msg, isErr){
+  const t=$("#toast");
+  t.innerHTML = (isErr?'':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>')+esc(msg);
+  t.classList.add("on");
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>t.classList.remove("on"), 2200);
+}
+
+/* meal photo hidden input */
+const mealPhotoInput=document.createElement("input");
+mealPhotoInput.type="file"; mealPhotoInput.accept="image/*"; mealPhotoInput.capture="environment";
+mealPhotoInput.style.display="none"; document.body.appendChild(mealPhotoInput);
+let mealPhotoTarget=null;
+mealPhotoInput.addEventListener("change",ev=>{
+  const file=ev.target.files[0]; if(!file||!mealPhotoTarget) return;
+  processImage(file,url=>{
+    if(!state.mealPhotos[current]) state.mealPhotos[current]={};
+    state.mealPhotos[current][mealPhotoTarget]=url;
+    save(); renderMeals(); toast("Photo added");
+  });
+  mealPhotoInput.value="";
+});
+
+/* ===================== THEME ===================== */
+function applyTheme(){
+  const root=document.documentElement;
+  if(state.theme) root.setAttribute("data-theme", state.theme);
+  else root.removeAttribute("data-theme");
+  const dark = state.theme==="dark" || (!state.theme && matchMedia("(prefers-color-scheme:dark)").matches);
+  $("#themeIcon").innerHTML = dark
+    ? '<path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/>'
+    : '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>';
+}
+
+/* ===================== EVENTS ===================== */
+document.addEventListener("click", e=>{
+  const c=e.target.closest("[data-close]");
+  if(c){ closeModal(c.dataset.close); return; }
+
+  const add=e.target.closest("[data-addfood]");
+  if(add){ openPicker(add.dataset.addfood); return; }
+
+  const foodBtn=e.target.closest("[data-food]");
+  if(foodBtn){ openQuantity(foodBtn.dataset.food); return; }
+
+  const del=e.target.closest("[data-del]");
+  if(del){
+    const id=del.dataset.del;
+    state.log[current]=dayEntries().filter(x=>x.id!==id);
+    save(); render(); toast("Removed");
+    return;
+  }
+
+  const mp=e.target.closest("[data-mealphoto]");
+  if(mp){ mealPhotoTarget=mp.dataset.mealphoto; mealPhotoInput.click(); return; }
+
+  const dbEdit=e.target.closest("[data-dbedit]");
+  if(dbEdit){ openNewFoodFormInDB(foodById(dbEdit.dataset.dbedit)); return; }
+
+  const dbDel=e.target.closest("[data-dbdel]");
+  if(dbDel){
+    const f=foodById(dbDel.dataset.dbdel);
+    if(confirm('Delete "'+f.name+'" from your database? Existing log entries stay put.')){
+      state.foods=state.foods.filter(x=>x.id!==f.id);
+      save(); renderDB(); render(); toast("Food deleted");
+    }
+    return;
+  }
+});
+// close on scrim click
+document.querySelectorAll(".scrim").forEach(s=>{
+  s.addEventListener("click",e=>{ if(e.target===s) closeModal(s.id); });
+});
+document.addEventListener("keydown",e=>{
+  if(e.key==="Escape"){ document.querySelectorAll(".scrim.on").forEach(s=>closeModal(s.id)); }
+});
+
+$("#prevDay").onclick=()=>{ current=shiftDay(current,-1); render(); };
+$("#nextDay").onclick=()=>{ current=shiftDay(current, 1); render(); };
+$("#goalBtn").onclick=openGoals;
+$("#dbBtn").onclick=()=>{ renderDB(); openModal("dbScrim"); };
+$("#themeBtn").onclick=()=>{
+  const dark = state.theme==="dark" || (!state.theme && matchMedia("(prefers-color-scheme:dark)").matches);
+  state.theme = dark? "light":"dark"; save(); applyTheme();
+};
+["gPro","gCarb","gFat"].forEach(id=>document.getElementById(id).addEventListener("input",updateGoalPreview));
+$("#saveGoals").onclick=()=>{
+  state.goals={ kcal:+$("#gCal").value||0, p:+$("#gPro").value||0, c:+$("#gCarb").value||0, f:+$("#gFat").value||0 };
+  save(); render(); closeModal("goalScrim"); toast("Goals updated");
+};
+
+/* ===================== INIT ===================== */
+applyTheme();
+render();
+matchMedia("(prefers-color-scheme:dark)").addEventListener("change",()=>{ if(!state.theme) applyTheme(); });
+</script>
