@@ -6,6 +6,7 @@ button,input,select,textarea{font:inherit;color:inherit}
 button{cursor:pointer;border:none;background:none}
 img{max-width:100%;display:block}
 :focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:6px}
+[hidden]{display:none!important}
 
 /* ---------- Tokens ---------- */
 :root{
@@ -105,6 +106,27 @@ body{
 /* ---------- Layout grid ---------- */
 .grid{display:grid;grid-template-columns:360px 1fr;gap:18px;align-items:start}
 @media (max-width:840px){.grid{grid-template-columns:1fr}}
+
+/* ---------- Day / Week toggle ---------- */
+.viewseg{display:flex;gap:5px;background:var(--surface-2);padding:4px;border-radius:11px;width:fit-content;
+  margin:-6px auto 18px}
+.viewseg button{padding:7px 24px;border-radius:8px;font-weight:700;font-size:12.5px;color:var(--ink-3)}
+.viewseg button.on{background:var(--surface);color:var(--ink);box-shadow:var(--shadow)}
+
+/* ---------- Week view ---------- */
+.weekcard{padding:22px}
+.weekchart{width:100%;height:auto;display:block}
+.weekchart .bar{cursor:pointer}
+.week-stats{display:flex;flex-direction:column;gap:10px;margin-top:18px}
+.week-stats .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.week-stats .row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.wstat{background:var(--surface-2);border-radius:12px;padding:12px;text-align:center}
+.wstat .wl{font-size:11px;font-weight:700;color:var(--ink-3);text-transform:uppercase;letter-spacing:.05em;
+  display:flex;align-items:center;justify-content:center;gap:5px}
+.wstat .wl .dot{width:8px;height:8px;border-radius:2px}
+.wstat .wv{font-weight:800;font-size:19px;margin-top:3px;letter-spacing:-.01em}
+.wstat .wv small{font-weight:600;font-size:11px;color:var(--ink-3)}
+.week-empty{text-align:center;color:var(--ink-3);font-weight:600;font-size:13.5px;margin-top:16px}
 
 .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
 
@@ -336,7 +358,14 @@ body{
     <button id="nextDay" aria-label="Next day"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg></button>
   </nav>
 
-  <div class="grid">
+  <div class="viewseg" role="tablist" aria-label="Day or week view">
+    <button id="viewDay" class="on" role="tab" aria-selected="true">Day</button>
+    <button id="viewWeek" role="tab" aria-selected="false">Week</button>
+  </div>
+
+  <section class="card weekcard" id="weekView" hidden aria-label="Weekly summary"></section>
+
+  <div class="grid" id="dayView">
     <!-- Summary -->
     <aside class="card summary">
       <div class="ring-wrap">
@@ -17664,19 +17693,124 @@ function processImage(file, cb){
 }
 
 /* ===================== RENDER ===================== */
+let view="day"; // "day" | "week"
 function render(){
   renderDate();
-  renderSummary();
-  renderMeals();
+  if(view==="week"){ renderWeek(); }
+  else { renderSummary(); renderMeals(); }
 }
 
 function renderDate(){
+  if(view==="week"){
+    const ks=weekKeys(), a=keyToDate(ks[0]), b=keyToDate(ks[6]);
+    const hasToday=ks.includes(todayKey());
+    const aTxt=a.toLocaleDateString(undefined,{month:"short",day:"numeric"});
+    const bTxt=b.toLocaleDateString(undefined, a.getMonth()===b.getMonth()? {day:"numeric"} : {month:"short",day:"numeric"});
+    $("#dateMain").innerHTML = esc(aTxt+" – "+bTxt) + (hasToday?' <span class="today-pill">This week</span>':'');
+    $("#dateSub").textContent = "Weekly summary, " + b.getFullYear();
+    return;
+  }
   const d=keyToDate(current);
   const wd=d.toLocaleDateString(undefined,{weekday:"long"});
   const md=d.toLocaleDateString(undefined,{month:"long",day:"numeric"});
   const isToday = current===todayKey();
   $("#dateMain").innerHTML = esc(wd) + (isToday?' <span class="today-pill">Today</span>':'');
   $("#dateSub").textContent = md + ", " + d.getFullYear();
+}
+
+/* ===================== WEEK VIEW ===================== */
+function weekKeys(){
+  const d=keyToDate(current);
+  const dow=(d.getDay()+6)%7;           // Monday = 0
+  d.setDate(d.getDate()-dow);
+  return Array.from({length:7},(_,i)=>{
+    const x=new Date(d); x.setDate(d.getDate()+i); return todayKey(x);
+  });
+}
+function totalsFor(key){
+  const es=state.log[key]||[];
+  const t=es.reduce((a,e)=>{const x=entryTotals(e);a.kcal+=x.kcal;a.p+=x.p;a.c+=x.c;a.f+=x.f;return a;},
+    {kcal:0,p:0,c:0,f:0});
+  t.n=es.length;
+  return t;
+}
+function renderWeek(){
+  const g=state.goals;
+  const days=weekKeys().map(k=>({k, ...totalsFor(k)}));
+  const today=todayKey();
+  const maxV=Math.max(g.kcal||0, ...days.map(d=>d.kcal), 100)*1.14;
+  const W=700, TOP=30, BOT=168, LBL=196;         // svg coords
+  const y=v=>BOT-(v/maxV)*(BOT-TOP);
+  const slot=W/7, bw=42;
+  let svg="";
+  // recessive grid
+  [0.25,0.5,0.75].forEach(fq=>{
+    const gy=BOT-(BOT-TOP)*fq;
+    svg+=`<line x1="0" y1="${gy}" x2="${W}" y2="${gy}" stroke="var(--line)" stroke-width="1" opacity="0.6"/>`;
+  });
+  svg+=`<line x1="0" y1="${BOT}" x2="${W}" y2="${BOT}" stroke="var(--line)" stroke-width="1.5"/>`;
+  // bars + labels
+  days.forEach((d,di)=>{
+    const dt=keyToDate(d.k);
+    const x0=slot*di + (slot-bw)/2;
+    const over=g.kcal>0 && d.kcal>g.kcal;
+    const has=d.n>0;
+    const isToday=d.k===today;
+    const col=over? "var(--danger)":"var(--accent)";
+    const yt=has? Math.min(y(d.kcal), BOT-4) : BOT-3;
+    const title=`${dt.toLocaleDateString(undefined,{weekday:"long",month:"short",day:"numeric"})} — ${r0(d.kcal)} kcal · P ${r0(d.p)} C ${r0(d.c)} F ${r0(d.f)}`;
+    svg+=`<g class="bar" data-goday="${d.k}"><title>${esc(title)}</title>`;
+    if(has){
+      svg+=`<path d="M ${x0} ${BOT} L ${x0} ${yt+4} Q ${x0} ${yt} ${x0+4} ${yt} L ${x0+bw-4} ${yt} Q ${x0+bw} ${yt} ${x0+bw} ${yt+4} L ${x0+bw} ${BOT} Z" fill="${col}"/>`;
+      svg+=`<text x="${x0+bw/2}" y="${yt-7}" text-anchor="middle" font-size="13" font-weight="${isToday?800:700}"
+        fill="${isToday?"var(--ink)":"var(--ink-2)"}" style="font-variant-numeric:tabular-nums">${over?"▲ ":""}${r0(d.kcal).toLocaleString()}</text>`;
+    } else {
+      svg+=`<rect x="${x0}" y="${BOT-3}" width="${bw}" height="3" rx="1.5" fill="var(--line)"/>`;
+    }
+    svg+=`<rect x="${slot*di}" y="${TOP-14}" width="${slot}" height="${LBL-TOP+14}" fill="transparent"/>`; // big hit target
+    svg+=`<text x="${x0+bw/2}" y="${LBL-8}" text-anchor="middle" font-size="12.5" font-weight="${isToday?800:600}"
+      fill="${isToday?"var(--accent-deep)":"var(--ink-3)"}">${dt.toLocaleDateString(undefined,{weekday:"short"})} ${dt.getDate()}</text>`;
+    svg+=`</g>`;
+  });
+  // goal reference line (above bars so it stays visible crossing them)
+  if(g.kcal>0){
+    const gy=y(g.kcal);
+    svg+=`<line x1="0" y1="${gy}" x2="${W}" y2="${gy}" stroke="var(--ink-3)" stroke-width="1.5" stroke-dasharray="5 5" opacity="0.8"/>`;
+    svg+=`<text x="${W-2}" y="${gy-6}" text-anchor="end" font-size="11.5" font-weight="700" fill="var(--ink-3)" style="font-variant-numeric:tabular-nums">Goal ${g.kcal.toLocaleString()}</text>`;
+  }
+  const logged=days.filter(d=>d.n>0);
+  const avg=k=>logged.length? logged.reduce((s,d)=>s+d[k],0)/logged.length : 0;
+  const onTarget=g.kcal>0? logged.filter(d=>d.kcal<=g.kcal).length : 0;
+  let stats;
+  if(logged.length){
+    stats=`<div class="week-stats">
+      <div class="row2">
+        <div class="wstat"><div class="wl">Avg intake</div><div class="wv tnum">${r0(avg("kcal")).toLocaleString()} <small>kcal/day</small></div></div>
+        <div class="wstat"><div class="wl">On target</div><div class="wv tnum">${onTarget} <small>of ${logged.length} logged</small></div></div>
+      </div>
+      <div class="row3">
+        <div class="wstat"><div class="wl"><span class="dot" style="background:var(--protein)"></span>Protein</div><div class="wv tnum">${r0(avg("p"))} <small>g avg</small></div></div>
+        <div class="wstat"><div class="wl"><span class="dot" style="background:var(--carbs)"></span>Carbs</div><div class="wv tnum">${r0(avg("c"))} <small>g avg</small></div></div>
+        <div class="wstat"><div class="wl"><span class="dot" style="background:var(--fat)"></span>Fat</div><div class="wv tnum">${r0(avg("f"))} <small>g avg</small></div></div>
+      </div>
+    </div>`;
+  } else {
+    stats=`<div class="week-empty">Nothing logged this week yet — tap a day to start.</div>`;
+  }
+  $("#weekView").innerHTML=`
+    <svg class="weekchart" viewBox="0 0 ${W} ${LBL}" role="img"
+      aria-label="Calories per day this week, against a goal of ${g.kcal.toLocaleString()}">${svg}</svg>
+    ${stats}`;
+}
+function setView(v){
+  view=v;
+  $("#viewDay").classList.toggle("on", v==="day");
+  $("#viewDay").setAttribute("aria-selected", v==="day");
+  $("#viewWeek").classList.toggle("on", v==="week");
+  $("#viewWeek").setAttribute("aria-selected", v==="week");
+  $("#weekView").hidden = v!=="week";
+  $("#dayView").hidden = v==="week";
+  render();
 }
 
 function renderSummary(){
@@ -18388,6 +18522,9 @@ document.addEventListener("click", e=>{
   const tplAdd=e.target.closest("[data-mealtpl]");
   if(tplAdd){ addSavedMeal(tplAdd.dataset.mealtpl); return; }
 
+  const goday=e.target.closest("[data-goday]");
+  if(goday){ current=goday.dataset.goday; setView("day"); return; }
+
   const dbEdit=e.target.closest("[data-dbedit]");
   if(dbEdit){ openNewFoodFormInDB(foodById(dbEdit.dataset.dbedit)); return; }
 
@@ -18410,8 +18547,10 @@ document.addEventListener("keydown",e=>{
   if(e.key==="Escape"){ document.querySelectorAll(".scrim.on").forEach(s=>closeModal(s.id)); }
 });
 
-$("#prevDay").onclick=()=>{ current=shiftDay(current,-1); render(); };
-$("#nextDay").onclick=()=>{ current=shiftDay(current, 1); render(); };
+$("#prevDay").onclick=()=>{ current=shiftDay(current, view==="week"?-7:-1); render(); };
+$("#nextDay").onclick=()=>{ current=shiftDay(current, view==="week"? 7: 1); render(); };
+$("#viewDay").onclick=()=>setView("day");
+$("#viewWeek").onclick=()=>setView("week");
 $("#goalBtn").onclick=openGoals;
 $("#dbBtn").onclick=()=>{ renderDB(); openModal("dbScrim"); };
 $("#themeBtn").onclick=()=>{
